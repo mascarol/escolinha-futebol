@@ -1,30 +1,90 @@
-⚽ Sistema de Gestão e Avaliação Física - Escolinha de Futebol
+# ⚽ Sistema de Gestão e Avaliação Física - Escolinha de Futebol
 
 API REST desenvolvida para gerenciamento de alunos, responsáveis e acompanhamento de evolução física em escolinhas de futebol. O projeto foi projetado com foco em praticidade e arquitetura PWA (Progressive Web App), permitindo acesso simplificado tanto em dispositivos móveis quanto em computadores, sem a necessidade de instalação via lojas de aplicativos.
-🎯 Objetivo do Projeto
+
+---
+
+## 🎯 Objetivo do Projeto
 
 Oferecer uma solução simples e intuitiva para escolinhas de futebol que precisam organizar seus cadastros e ter um controle histórico da evolução física dos seus alunos. A interface e os endpoints foram pensados para garantir rapidez no cadastro e fácil acesso às informações em campo ou no escritório.
-🚀 Funcionalidades
 
-    Gestão de Alunos: Cadastro completo com nome, data de nascimento, foto, posição em campo, categoria/turma e observações médicas.
+---
 
-    Controle de Responsáveis: Vinculação de responsáveis ao aluno com armazenamento de contato para rápida comunicação via WhatsApp.
+## 🚀 Funcionalidades
 
-    Histórico de Avaliações Físicas: Registro contínuo de métricas como peso, altura, cálculo automático de IMC e nível de flexibilidade/alongamento.
+- **Gestão de Alunos:** Cadastro completo com nome, data de nascimento, foto, posição em campo, categoria/turma e observações médicas.
+- **Controle de Responsáveis:** Vinculação de responsáveis ao aluno com armazenamento de contato para rápida comunicação via WhatsApp.
+- **Histórico de Avaliações Físicas:** Registro contínuo de métricas como peso, altura, cálculo automático de IMC e nível de flexibilidade/alongamento.
+- **Métricas Customizáveis:** Estrutura flexível no banco de dados para inclusão de novos testes físicos (ex: velocidade, salto vertical, frequência cardíaca) sem alterar a estrutura do sistema.
 
-    Métricas Customizáveis: Estrutura flexível no banco de dados para inclusão de novos testes físicos (ex: velocidade, salto vertical, frequência cardíaca) sem alterar a estrutura do sistema.
+---
 
-🛠️ Tecnologias Utilizadas
+## 🛠️ Tecnologias Utilizadas
 
-    Linguagem / Ambiente: Node.js
+- **Linguagem / Ambiente:** Node.js
+- **Framework:** Express.js
+- **Banco de Dados:** PostgreSQL / SQLite
+- **ORM / Query Builder:** Prisma (ou Knex.js / Sequelize)
+- **Documentação / Testes de API:** Postman / Insomnia
 
-    Framework: Express.js
+---
 
-    Banco de Dados: PostgreSQL / SQLite
+## 🗄️ Estrutura do Banco de Dados
 
-    ORM / Query Builder: Prisma (ou Knex.js / Sequelize)
+O banco de dados foi modelado de forma relacional para manter a integridade entre alunos, responsáveis e seus históricos físicos:
 
-    Documentação / Testes de API: Postman / Insomnia
+- **Alunos** (1) ─── (N) **Responsáveis**
+- **Alunos** (1) ─── (N) **Avaliações Físicas**
+- **Avaliações Físicas** (1) ─── (N) **Métricas Customizáveis**
 
+---
 
-    - EM CONSTRUÇÃO -# escolinha-futebol
+## 📌 Rotas da API (Endpoints)
+
+### Alunos e Responsáveis
+- `POST /api/alunos` — Cadastra um novo aluno com dados do responsável
+- `GET /api/alunos` — Lista todos os alunos (suporta filtro por nome/turma)
+- `GET /api/alunos/:id` — Retorna os detalhes de um aluno específico
+- `PUT /api/alunos/:id` — Atualiza os dados de um aluno ou responsável
+- `DELETE /api/alunos/:id` — Remove o registro do aluno
+
+### Avaliações Físicas
+- `POST /api/alunos/:id/avaliacoes` — Registra uma nova avaliação física para o aluno
+- `GET /api/alunos/:id/avaliacoes` — Retorna o histórico de avaliações do aluno
+- `DELETE /api/avaliacoes/:id` — Remove um registro de avaliação
+
+---
+
+## 💻 Como Executar o Projeto Localmente
+
+### Pré-requisitos
+- Node.js instalado (versão 18 ou superior)
+- Gerenciador de pacotes (npm ou yarn)
+
+### Passo a passo
+
+1. **Clonar o repositório:**
+   git clone https://github.com/seu-usuario/nome-do-repositorio.git
+   cd nome-do-repositorio
+
+2. **Instalar as dependências:**
+   npm install
+
+3. **Configurar as variáveis de ambiente:**
+   Crie um arquivo `.env` na raiz do projeto com base no arquivo `.env.example`:
+   PORT=3000
+   DATABASE_URL="sua_string_de_conexao_aqui"
+
+4. **Executar as migrações do banco de dados:**
+   npm run migrate
+
+5. **Iniciar o servidor de desenvolvimento:**
+   npm run dev
+
+A API estará rodando em `http://localhost:3000`.
+
+---
+
+## 🤝 Licença
+
+Este projeto está sob a licença MIT.
