@@ -5,66 +5,119 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Fantasminha Futebol Clube 👻⚽</title>
   
-  <!-- Meta tags do PWA -->
   <link rel="manifest" href="/manifest.json">
   <meta name="theme-color" content="#dc2626">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="Fantasminha FC">
 
-  <!-- Tailwind CSS para estilo moderno -->
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-gray-100 min-h-screen text-gray-800 font-sans pb-10">
 
-  <!-- CABEÇALHO -->
-  <header class="bg-red-600 text-white shadow-md p-4 sticky top-0 z-10">
-    <div class="max-w-4xl mx-auto flex justify-between items-center">
-      <div class="flex items-center gap-2">
-        <span class="text-3xl">👻⚽</span>
+  <!-- TELA DE LOGIN / PORTARIA -->
+  <div id="telaLogin" class="min-h-screen flex items-center justify-center p-4 bg-gradient-to-b from-red-600 to-red-800 text-white">
+    <div class="bg-white text-gray-800 rounded-3xl p-6 md:p-8 w-full max-w-md shadow-2xl space-y-6">
+      
+      <div class="text-center space-y-2">
+        <span class="text-5xl block">👻⚽</span>
+        <h1 class="text-2xl font-black text-red-700 tracking-wide uppercase">Fantasminha FC</h1>
+        <p class="text-xs text-gray-500 font-medium">Selecione como deseja entrar no sistema</p>
+      </div>
+
+      <!-- BOTÕES DE SELEÇÃO DE PERFIL -->
+      <div class="grid grid-cols-2 gap-3 bg-gray-100 p-1.5 rounded-2xl text-sm font-bold">
+        <button id="abaProf" onclick="alternarAbaLogin('professor')" class="py-2.5 rounded-xl bg-red-600 text-white shadow transition">
+          ⚽ Treinador
+        </button>
+        <button id="abaResp" onclick="alternarAbaLogin('responsavel')" class="py-2.5 rounded-xl text-gray-600 hover:text-gray-900 transition">
+          👨‍👩‍👧 Responsável
+        </button>
+      </div>
+
+      <!-- FORMULÁRIO TREINADOR -->
+      <form id="formLoginProf" onsubmit="fazerLoginProf(event)" class="space-y-4">
         <div>
-          <h1 class="text-xl font-black tracking-wide uppercase leading-none">Fantasminha FC</h1>
-          <p class="text-xs text-red-100 font-medium">Escolinha de Futebol</p>
+          <label class="block text-xs font-semibold mb-1 text-gray-600">Senha do Treinador</label>
+          <input type="password" id="senhaProf" placeholder="Digite a senha (padrão: 1234)" required class="w-full border rounded-xl p-3 text-sm focus:ring-2 focus:ring-red-500 focus:outline-none">
+        </div>
+        <button type="submit" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-3 rounded-xl shadow transition">
+          Entrar como Treinador 🔑
+        </button>
+      </form>
+
+      <!-- FORMULÁRIO RESPONSÁVEL -->
+      <form id="formLoginResp" onsubmit="fazerLoginResp(event)" class="space-y-4 hidden">
+        <div>
+          <label class="block text-xs font-semibold mb-1 text-gray-600">CPF ou WhatsApp do Responsável</label>
+          <input type="text" id="cpfResp" placeholder="Digite o CPF ou WhatsApp cadastrado" required class="w-full border rounded-xl p-3 text-sm focus:ring-2 focus:ring-red-500 focus:outline-none">
+        </div>
+        <button type="submit" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-3 rounded-xl shadow transition">
+          Acessar Ficha do Filho 🔓
+        </button>
+      </form>
+
+      <p id="msgErroLogin" class="text-xs text-red-600 text-center font-bold hidden bg-red-50 p-2.5 rounded-lg border border-red-200"></p>
+
+    </div>
+  </div>
+
+  <!-- APLICAÇÃO PRINCIPAL (Escondida até fazer login) -->
+  <div id="appPrincipal" class="hidden">
+    
+    <!-- CABEÇALHO -->
+    <header class="bg-red-600 text-white shadow-md p-4 sticky top-0 z-10">
+      <div class="max-w-4xl mx-auto flex justify-between items-center">
+        <div class="flex items-center gap-2">
+          <span class="text-3xl">👻⚽</span>
+          <div>
+            <h1 class="text-xl font-black tracking-wide uppercase leading-none">Fantasminha FC</h1>
+            <p id="subtituloHeader" class="text-xs text-red-100 font-medium">Modo Treinador</p>
+          </div>
+        </div>
+        <div class="flex items-center gap-2">
+          <button id="btnNovoAluno" onclick="abrirModalCadastro()" class="bg-white hover:bg-gray-100 text-red-700 font-bold px-3 py-1.5 rounded-lg shadow text-xs md:text-sm transition">
+            + Novo Aluno
+          </button>
+          <button onclick="sairLogin()" class="bg-red-800 hover:bg-red-900 text-white text-xs px-3 py-1.5 rounded-lg shadow transition">
+            Sair 🚪
+          </button>
         </div>
       </div>
-      <button onclick="abrirModalCadastro()" class="bg-white hover:bg-gray-100 text-red-700 font-bold px-4 py-2 rounded-lg shadow flex items-center gap-1 transition text-sm md:text-base">
-        <span class="text-xl font-bold">+</span> Novo Aluno
-      </button>
-    </div>
-  </header>
+    </header>
 
-  <!-- CONTEÚDO PRINCIPAL -->
-  <main class="max-w-4xl mx-auto p-4">
+    <!-- CONTEÚDO PRINCIPAL -->
+    <main class="max-w-4xl mx-auto p-4">
 
-    <!-- BARRA DE BUSCA E FILTROS -->
-    <section class="bg-white p-4 rounded-xl shadow mb-6 space-y-3 border-t-4 border-red-600">
-      <div class="flex gap-2">
-        <input 
-          type="text" 
-          id="campoBusca" 
-          placeholder="🔍 Buscar aluno por nome..." 
-          class="w-full border border-gray-300 rounded-lg px-4 py-3 text-lg focus:outline-none focus:ring-2 focus:ring-red-500"
-          oninput="carregarAlunos()"
-        >
-      </div>
+      <!-- BARRA DE BUSCA (Apenas para Treinador) -->
+      <section id="secaoFiltros" class="bg-white p-4 rounded-xl shadow mb-6 space-y-3 border-t-4 border-red-600">
+        <div class="flex gap-2">
+          <input 
+            type="text" 
+            id="campoBusca" 
+            placeholder="🔍 Buscar aluno por nome..." 
+            class="w-full border border-gray-300 rounded-lg px-4 py-3 text-lg focus:outline-none focus:ring-2 focus:ring-red-500"
+            oninput="carregarAlunos()"
+          >
+        </div>
 
-      <!-- Atalhos de Categoria/Turma -->
-      <div class="flex gap-2 overflow-x-auto pb-1 text-sm">
-        <button onclick="filtrarTurma('')" class="bg-gray-200 hover:bg-red-600 hover:text-white px-3 py-1.5 rounded-full font-medium whitespace-nowrap">Todas as Turmas</button>
-        <button onclick="filtrarTurma('Sub-7')" class="bg-gray-200 hover:bg-red-600 hover:text-white px-3 py-1.5 rounded-full font-medium whitespace-nowrap">Sub-7</button>
-        <button onclick="filtrarTurma('Sub-9')" class="bg-gray-200 hover:bg-red-600 hover:text-white px-3 py-1.5 rounded-full font-medium whitespace-nowrap">Sub-9</button>
-        <button onclick="filtrarTurma('Sub-11')" class="bg-gray-200 hover:bg-red-600 hover:text-white px-3 py-1.5 rounded-full font-medium whitespace-nowrap">Sub-11</button>
-        <button onclick="filtrarTurma('Sub-13')" class="bg-gray-200 hover:bg-red-600 hover:text-white px-3 py-1.5 rounded-full font-medium whitespace-nowrap">Sub-13</button>
-        <button onclick="filtrarTurma('Sub-15')" class="bg-gray-200 hover:bg-red-600 hover:text-white px-3 py-1.5 rounded-full font-medium whitespace-nowrap">Sub-15</button>
-      </div>
-    </section>
+        <div class="flex gap-2 overflow-x-auto pb-1 text-sm">
+          <button onclick="filtrarTurma('')" class="bg-gray-200 hover:bg-red-600 hover:text-white px-3 py-1.5 rounded-full font-medium whitespace-nowrap">Todas as Turmas</button>
+          <button onclick="filtrarTurma('Sub-7')" class="bg-gray-200 hover:bg-red-600 hover:text-white px-3 py-1.5 rounded-full font-medium whitespace-nowrap">Sub-7</button>
+          <button onclick="filtrarTurma('Sub-9')" class="bg-gray-200 hover:bg-red-600 hover:text-white px-3 py-1.5 rounded-full font-medium whitespace-nowrap">Sub-9</button>
+          <button onclick="filtrarTurma('Sub-11')" class="bg-gray-200 hover:bg-red-600 hover:text-white px-3 py-1.5 rounded-full font-medium whitespace-nowrap">Sub-11</button>
+          <button onclick="filtrarTurma('Sub-13')" class="bg-gray-200 hover:bg-red-600 hover:text-white px-3 py-1.5 rounded-full font-medium whitespace-nowrap">Sub-13</button>
+          <button onclick="filtrarTurma('Sub-15')" class="bg-gray-200 hover:bg-red-600 hover:text-white px-3 py-1.5 rounded-full font-medium whitespace-nowrap">Sub-15</button>
+        </div>
+      </section>
 
-    <!-- LISTA DE ALUNOS -->
-    <section id="listaAlunos" class="grid grid-cols-1 md:grid-cols-2 gap-4">
-      <p class="text-center text-gray-500 col-span-2 py-8">Carregando alunos do Fantasminha FC...</p>
-    </section>
+      <!-- LISTA DE ALUNOS -->
+      <section id="listaAlunos" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <p class="text-center text-gray-500 col-span-2 py-8">Carregando...</p>
+      </section>
 
-  </main>
+    </main>
+  </div>
 
   <!-- MODAL DE CADASTRO DE ALUNO -->
   <div id="modalCadastro" class="fixed inset-0 bg-black/60 hidden flex items-center justify-center p-4 z-50">
@@ -76,8 +129,6 @@
       </h2>
 
       <form id="formAluno" onsubmit="salvarAluno(event)" class="space-y-4">
-        
-        <!-- FOTO DO ATLETA VIA CÂMERA -->
         <div class="bg-gray-50 p-3 rounded-xl border flex items-center gap-4">
           <div id="previewFotoContainer" class="w-16 h-16 rounded-full bg-red-100 border-2 border-red-500 flex items-center justify-center overflow-hidden text-2xl shrink-0">
             👻
@@ -88,7 +139,6 @@
               <span>📸</span> Tirar Foto / Câmera
               <input type="file" id="inputFoto" accept="image/*" capture="environment" class="hidden" onchange="processarFoto(event)">
             </label>
-            <p class="text-[10px] text-gray-400 mt-1">Abre a câmera do celular ou arquivo</p>
           </div>
         </div>
 
@@ -144,6 +194,11 @@
               <input type="tel" id="resp_telefone" placeholder="11999998888" required class="w-full border rounded-lg p-2.5 focus:ring-2 focus:ring-red-500">
             </div>
           </div>
+
+          <div>
+            <label class="block text-sm font-medium mb-1">CPF do Responsável (para acesso dos pais)</label>
+            <input type="text" id="resp_cpf" placeholder="12345678900" class="w-full border rounded-lg p-2.5 focus:ring-2 focus:ring-red-500">
+          </div>
         </div>
 
         <div class="flex justify-end gap-3 pt-4">
@@ -163,10 +218,9 @@
         <h2 id="tituloModalAvaliacao" class="text-2xl font-bold text-red-700 flex items-center gap-2">
           📊 Avaliações Físicas
         </h2>
-        <p id="subtituloModalAvaliacao" class="text-sm text-gray-500 mt-0.5"></p>
       </div>
 
-      <!-- FORMULÁRIO DE NOVA AVALIAÇÃO -->
+      <!-- FORMULÁRIO DE NOVA AVALIAÇÃO (Visível apenas para treinador) -->
       <form id="formAvaliacao" onsubmit="salvarAvaliacao(event)" class="bg-gray-50 p-4 rounded-xl border mb-6 space-y-4">
         <h3 class="font-bold text-gray-700 flex items-center gap-1 text-sm uppercase tracking-wide">
           <span>➕</span> Nova Avaliação Física
@@ -223,24 +277,137 @@
     </div>
   </div>
 
-  <!-- SCRIPT DE INTEGRAÇÃO E LÓGICA -->
+  <!-- SCRIPT DE LÓGICA E AUTENTICAÇÃO -->
   <script>
+    let perfilAtual = null; // 'professor' ou 'responsavel'
+    let alunoRespId = null; // Guardará o ID do filho quando for login de responsável
     let turmaFiltroAtual = '';
     let alunoSelecionadoId = null;
-    let fotoBase64Atual = ''; // Guarda a imagem capturada em texto Base64
+    let fotoBase64Atual = '';
 
-    document.addEventListener('DOMContentLoaded', carregarAlunos);
+    // Alternar abas do Login
+    function alternarAbaLogin(tipo) {
+      const abaProf = document.getElementById('abaProf');
+      const abaResp = document.getElementById('abaResp');
+      const formProf = document.getElementById('formLoginProf');
+      const formResp = document.getElementById('formLoginResp');
+      document.getElementById('msgErroLogin').classList.add('hidden');
 
-    // Processar foto da câmera e converter em Base64
+      if (tipo === 'professor') {
+        abaProf.className = 'py-2.5 rounded-xl bg-red-600 text-white shadow transition';
+        abaResp.className = 'py-2.5 rounded-xl text-gray-600 hover:text-gray-900 transition';
+        formProf.classList.remove('hidden');
+        formResp.classList.add('hidden');
+      } else {
+        abaResp.className = 'py-2.5 rounded-xl bg-red-600 text-white shadow transition';
+        abaProf.className = 'py-2.5 rounded-xl text-gray-600 hover:text-gray-900 transition';
+        formResp.classList.remove('hidden');
+        formProf.classList.add('hidden');
+      }
+    }
+
+    // Login Treinador
+    async function fazerLoginProf(event) {
+      event.preventDefault();
+      const senha = document.getElementById('senhaProf').value;
+      const msgErro = document.getElementById('msgErroLogin');
+
+      try {
+        const res = await fetch('/api/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ tipo: 'professor', senha })
+        });
+        const data = await res.json();
+
+        if (res.ok && data.sucesso) {
+          perfilAtual = 'professor';
+          iniciarSessao();
+        } else {
+          msgErro.innerText = data.erro || 'Erro ao fazer login.';
+          msgErro.classList.remove('hidden');
+        }
+      } catch (e) {
+        msgErro.innerText = 'Erro ao conectar ao servidor.';
+        msgErro.classList.remove('hidden');
+      }
+    }
+
+    // Login Responsável
+    async function fazerLoginResp(event) {
+      event.preventDefault();
+      const cpf = document.getElementById('cpfResp').value;
+      const msgErro = document.getElementById('msgErroLogin');
+
+      try {
+        const res = await fetch('/api/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ tipo: 'responsavel', cpf })
+        });
+        const data = await res.json();
+
+        if (res.ok && data.sucesso) {
+          perfilAtual = 'responsavel';
+          alunoRespId = data.alunoId;
+          iniciarSessao(data.nome);
+        } else {
+          msgErro.innerText = data.erro || 'CPF/Telefone não encontrado.';
+          msgErro.classList.remove('hidden');
+        }
+      } catch (e) {
+        msgErro.innerText = 'Erro ao conectar ao servidor.';
+        msgErro.classList.remove('hidden');
+      }
+    }
+
+    function iniciarSessao(nomeResp = '') {
+      document.getElementById('telaLogin').classList.add('hidden');
+      document.getElementById('appPrincipal').classList.remove('hidden');
+
+      if (perfilAtual === 'professor') {
+        document.getElementById('subtituloHeader').innerText = 'Modo Treinador (Acesso Total)';
+        document.getElementById('btnNovoAluno').classList.remove('hidden');
+        document.getElementById('secaoFiltros').classList.remove('hidden');
+        document.getElementById('formAvaliacao').classList.remove('hidden');
+        carregarAlunos();
+      } else {
+        document.getElementById('subtituloHeader').innerText = `Área do Responsável (${nomeResp})`;
+        document.getElementById('btnNovoAluno').classList.add('hidden');
+        document.getElementById('secaoFiltros').classList.add('hidden');
+        document.getElementById('formAvaliacao').classList.add('hidden'); // O pai não lança avaliações
+        carregarFichaFilho();
+      }
+    }
+
+    function sairLogin() {
+      perfilAtual = null;
+      alunoRespId = null;
+      document.getElementById('appPrincipal').classList.add('hidden');
+      document.getElementById('telaLogin').classList.remove('hidden');
+      document.getElementById('senhaProf').value = '';
+      document.getElementById('cpfResp').value = '';
+    }
+
+    // Carrega apenas o filho no modo Responsável
+    async function carregarFichaFilho() {
+      const container = document.getElementById('listaAlunos');
+      try {
+        const res = await fetch(`/api/alunos/${alunoRespId}`);
+        const aluno = await res.json();
+        renderizarAlunos([aluno]);
+      } catch (e) {
+        container.innerHTML = '<p class="text-red-500 text-center col-span-2">Erro ao carregar dados do filho.</p>';
+      }
+    }
+
     function processarFoto(event) {
-      const arquivo = event.target.files[0];
+      const arquivo = event.target.files;
       if (arquivo) {
         const reader = new FileReader();
         reader.onload = function(e) {
           fotoBase64Atual = e.target.result;
-          document.getElementById('previewFotoContainer').innerHTML = `
-            <img src="${fotoBase64Atual}" class="w-full h-full object-cover rounded-full">
-          `;
+          document.getElementById('previewFotoContainer').innerHTML = `<img src="${fotoBase64Atual}" class="w-full h-full object-cover rounded-full">`;
         };
         reader.readAsDataURL(arquivo);
       }
@@ -255,7 +422,6 @@
         const alunos = await resposta.json();
         renderizarAlunos(alunos);
       } catch (erro) {
-        console.error("Erro ao carregar alunos:", erro);
         document.getElementById('listaAlunos').innerHTML = `<p class="text-red-500 text-center col-span-2">Erro ao conectar com o servidor.</p>`;
       }
     }
@@ -277,7 +443,6 @@
         const zapLimpo = (aluno.telefone_whatsapp || '').replace(/\D/g, '');
         const linkZap = zapLimpo ? `https://wa.me/55${zapLimpo}` : '#';
 
-        // Renderizar Foto se existir ou Ícone do Fantasma
         const fotoHtml = aluno.foto_url
           ? `<img src="${aluno.foto_url}" class="w-12 h-12 rounded-full object-cover border-2 border-red-500 shrink-0">`
           : `<div class="w-12 h-12 rounded-full bg-red-100 text-red-600 flex items-center justify-center text-xl border-2 border-red-500 shrink-0">👻</div>`;
@@ -299,7 +464,7 @@
                   </div>
                 </div>
                 
-                ${zapLimpo ? `
+                ${zapLimpo && perfilAtual === 'professor' ? `
                   <a href="${linkZap}" target="_blank" class="bg-emerald-500 hover:bg-emerald-600 text-white p-2.5 rounded-full shadow transition flex items-center justify-center shrink-0" title="Chamar no WhatsApp">
                     💬
                   </a>
@@ -327,7 +492,6 @@
       carregarAlunos();
     }
 
-    // Modal Cadastro Aluno
     function abrirModalCadastro() { 
       fotoBase64Atual = '';
       document.getElementById('previewFotoContainer').innerHTML = '👻';
@@ -348,12 +512,13 @@
         data_nascimento: document.getElementById('data_nascimento').value,
         turma: document.getElementById('turma').value,
         posicao: document.getElementById('posicao').value,
-        foto_url: fotoBase64Atual, // Envia a imagem capturada
+        foto_url: fotoBase64Atual,
         observacoes_medicas: document.getElementById('observacoes_medicas').value,
         responsavel: {
           nome: document.getElementById('resp_nome').value,
           parentesco: document.getElementById('resp_parentesco').value,
-          telefone_whatsapp: document.getElementById('resp_telefone').value
+          telefone_whatsapp: document.getElementById('resp_telefone').value,
+          cpf: document.getElementById('resp_cpf').value
         }
       };
 
@@ -375,7 +540,6 @@
       }
     }
 
-    // Modal Avaliações Físicas
     function abrirModalAvaliacoes(idAluno, nomeAluno) {
       alunoSelecionadoId = idAluno;
       document.getElementById('tituloModalAvaliacao').innerText = `📊 Avaliações: ${nomeAluno}`;
@@ -517,7 +681,6 @@
     }
   </script>
 
-  <!-- Service Worker do PWA -->
   <script>
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
