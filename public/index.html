@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Fantasminha Futebol Clube 👻⚽</title>
+  
+  <!-- Meta tags do PWA -->
+  <link rel="manifest" href="/manifest.json">
+  <meta name="theme-color" content="#dc2626">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Fantasminha FC">
+
+  <!-- Tailwind CSS para estilo moderno -->
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 min-h-screen text-gray-800 font-sans pb-10">
+
+  <!-- CABEÇALHO -->
+  <header class="bg-red-600 text-white shadow-md p-4 sticky top-0 z-10">
+    <div class="max-w-4xl mx-auto flex justify-between items-center">
+      <div class="flex items-center gap-2">
+        <span class="text-3xl">👻⚽</span>
+        <div>
+          <h1 class="text-xl font-black tracking-wide uppercase leading-none">Fantasminha FC</h1>
+          <p class="text-xs text-red-100 font-medium">Escolinha de Futebol</p>
+        </div>
+      </div>
+      <button onclick="abrirModalCadastro()" class="bg-white hover:bg-gray-100 text-red-700 font-bold px-4 py-2 rounded-lg shadow flex items-center gap-1 transition text-sm md:text-base">
+        <span class="text-xl font-bold">+</span> Novo Aluno
+      </button>
+    </div>
+  </header>
+
+  <!-- CONTEÚDO PRINCIPAL -->
+  <main class="max-w-4xl mx-auto p-4">
+
+    <!-- BARRA DE BUSCA E FILTROS -->
+    <section class="bg-white p-4 rounded-xl shadow mb-6 space-y-3 border-t-4 border-red-600">
+      <div class="flex gap-2">
+        <input 
+          type="text" 
+          id="campoBusca" 
+          placeholder="🔍 Buscar aluno por nome..." 
+          class="w-full border border-gray-300 rounded-lg px-4 py-3 text-lg focus:outline-none focus:ring-2 focus:ring-red-500"
+          oninput="carregarAlunos()"
+        >
+      </div>
+
+      <!-- Atalhos de Categoria/Turma -->
+      <div class="flex gap-2 overflow-x-auto pb-1 text-sm">
+        <button onclick="filtrarTurma('')" class="bg-gray-200 hover:bg-red-600 hover:text-white px-3 py-1.5 rounded-full font-medium whitespace-nowrap">Todas as Turmas</button>
+        <button onclick="filtrarTurma('Sub-7')" class="bg-gray-200 hover:bg-red-600 hover:text-white px-3 py-1.5 rounded-full font-medium whitespace-nowrap">Sub-7</button>
+        <button onclick="filtrarTurma('Sub-9')" class="bg-gray-200 hover:bg-red-600 hover:text-white px-3 py-1.5 rounded-full font-medium whitespace-nowrap">Sub-9</button>
+        <button onclick="filtrarTurma('Sub-11')" class="bg-gray-200 hover:bg-red-600 hover:text-white px-3 py-1.5 rounded-full font-medium whitespace-nowrap">Sub-11</button>
+        <button onclick="filtrarTurma('Sub-13')" class="bg-gray-200 hover:bg-red-600 hover:text-white px-3 py-1.5 rounded-full font-medium whitespace-nowrap">Sub-13</button>
+        <button onclick="filtrarTurma('Sub-15')" class="bg-gray-200 hover:bg-red-600 hover:text-white px-3 py-1.5 rounded-full font-medium whitespace-nowrap">Sub-15</button>
+      </div>
+    </section>
+
+    <!-- LISTA DE ALUNOS -->
+    <section id="listaAlunos" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <p class="text-center text-gray-500 col-span-2 py-8">Carregando alunos do Fantasminha FC...</p>
+    </section>
+
+  </main>
+
+  <!-- MODAL DE CADASTRO DE ALUNO -->
+  <div id="modalCadastro" class="fixed inset-0 bg-black/60 hidden flex items-center justify-center p-4 z-50">
+    <div class="bg-white rounded-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto p-6 shadow-2xl relative">
+      <button onclick="fecharModalCadastro()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 text-2xl font-bold">&times;</button>
+      
+      <h2 class="text-2xl font-bold text-red-700 mb-4 flex items-center gap-2">
+        <span>📋</span> Cadastrar Novo Aluno
+      </h2>
+
+      <form id="formAluno" onsubmit="salvarAluno(event)" class="space-y-4">
+        
+        <!-- FOTO DO ATLETA VIA CÂMERA -->
+        <div class="bg-gray-50 p-3 rounded-xl border flex items-center gap-4">
+          <div id="previewFotoContainer" class="w-16 h-16 rounded-full bg-red-100 border-2 border-red-500 flex items-center justify-center overflow-hidden text-2xl shrink-0">
+            👻
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-gray-700 mb-1">Foto do Atleta</label>
+            <label class="bg-red-600 hover:bg-red-700 text-white font-bold px-3 py-1.5 rounded-lg shadow text-xs cursor-pointer inline-flex items-center gap-1 transition">
+              <span>📸</span> Tirar Foto / Câmera
+              <input type="file" id="inputFoto" accept="image/*" capture="environment" class="hidden" onchange="processarFoto(event)">
+            </label>
+            <p class="text-[10px] text-gray-400 mt-1">Abre a câmera do celular ou arquivo</p>
+          </div>
+        </div>
+
+        <div class="border-b pb-4 space-y-3">
+          <h3 class="font-semibold text-gray-700 text-sm tracking-wider uppercase">Dados do Atleta</h3>
+          <div>
+            <label class="block text-sm font-medium mb-1">Nome Completo *</label>
+            <input type="text" id="nome" required class="w-full border rounded-lg p-2.5 focus:ring-2 focus:ring-red-500">
+          </div>
+
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="block text-sm font-medium mb-1">Data Nasc. *</label>
+              <input type="date" id="data_nascimento" required class="w-full border rounded-lg p-2.5 focus:ring-2 focus:ring-red-500">
+            </div>
+            <div>
+              <label class="block text-sm font-medium mb-1">Turma / Categoria</label>
+              <select id="turma" class="w-full border rounded-lg p-2.5 focus:ring-2 focus:ring-red-500">
+                <option value="Sub-7">Sub-7</option>
+                <option value="Sub-9">Sub-9</option>
+                <option value="Sub-11" selected>Sub-11</option>
+                <option value="Sub-13">Sub-13</option>
+                <option value="Sub-15">Sub-15</option>
+              </select>
+            </div>
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium mb-1">Posição Preferida</label>
+            <input type="text" id="posicao" placeholder="Ex: Atacante, Goleiro, Meia" class="w-full border rounded-lg p-2.5 focus:ring-2 focus:ring-red-500">
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium mb-1">Observações Médicas / Restrições</label>
+            <textarea id="observacoes_medicas" placeholder="Alergias, asma, problemas de saúde..." class="w-full border rounded-lg p-2.5 focus:ring-2 focus:ring-red-500" rows="2"></textarea>
+          </div>
+        </div>
+
+        <div class="space-y-3 pt-2">
+          <h3 class="font-semibold text-gray-700 text-sm tracking-wider uppercase">Dados do Responsável</h3>
+          <div>
+            <label class="block text-sm font-medium mb-1">Nome do Responsável *</label>
+            <input type="text" id="resp_nome" required class="w-full border rounded-lg p-2.5 focus:ring-2 focus:ring-red-500">
+          </div>
+
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="block text-sm font-medium mb-1">Parentesco</label>
+              <input type="text" id="resp_parentesco" placeholder="Pai, Mãe, Avô..." class="w-full border rounded-lg p-2.5 focus:ring-2 focus:ring-red-500">
+            </div>
+            <div>
+              <label class="block text-sm font-medium mb-1">WhatsApp (com DDD) *</label>
+              <input type="tel" id="resp_telefone" placeholder="11999998888" required class="w-full border rounded-lg p-2.5 focus:ring-2 focus:ring-red-500">
+            </div>
+          </div>
+        </div>
+
+        <div class="flex justify-end gap-3 pt-4">
+          <button type="button" onclick="fecharModalCadastro()" class="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg">Cancelar</button>
+          <button type="submit" class="px-6 py-2 bg-red-600 hover:bg-red-700 text-white font-bold rounded-lg shadow">Salvar Cadastro</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL DE AVALIAÇÕES FÍSICAS -->
+  <div id="modalAvaliacoes" class="fixed inset-0 bg-black/60 hidden flex items-center justify-center p-4 z-50">
+    <div class="bg-white rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto p-6 shadow-2xl relative">
+      <button onclick="fecharModalAvaliacoes()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 text-2xl font-bold">&times;</button>
+      
+      <div class="border-b pb-3 mb-4">
+        <h2 id="tituloModalAvaliacao" class="text-2xl font-bold text-red-700 flex items-center gap-2">
+          📊 Avaliações Físicas
+        </h2>
+        <p id="subtituloModalAvaliacao" class="text-sm text-gray-500 mt-0.5"></p>
+      </div>
+
+      <!-- FORMULÁRIO DE NOVA AVALIAÇÃO -->
+      <form id="formAvaliacao" onsubmit="salvarAvaliacao(event)" class="bg-gray-50 p-4 rounded-xl border mb-6 space-y-4">
+        <h3 class="font-bold text-gray-700 flex items-center gap-1 text-sm uppercase tracking-wide">
+          <span>➕</span> Nova Avaliação Física
+        </h3>
+
+        <div class="grid grid-cols-2 md:grid-cols-3 gap-3">
+          <div>
+            <label class="block text-xs font-semibold mb-1">Peso (kg) *</label>
+            <input type="number" step="0.1" id="aval_peso" required placeholder="Ex: 35.5" oninput="calcularIMC()" class="w-full border rounded-lg p-2 text-sm focus:ring-2 focus:ring-red-500">
+          </div>
+          <div>
+            <label class="block text-xs font-semibold mb-1">Altura (cm) *</label>
+            <input type="number" step="1" id="aval_altura" required placeholder="Ex: 140" oninput="calcularIMC()" class="w-full border rounded-lg p-2 text-sm focus:ring-2 focus:ring-red-500">
+          </div>
+          <div>
+            <label class="block text-xs font-semibold mb-1">Alongamento (cm)</label>
+            <input type="number" step="0.5" id="aval_alongamento" placeholder="Ex: 22" class="w-full border rounded-lg p-2 text-sm focus:ring-2 focus:ring-red-500">
+          </div>
+        </div>
+
+        <div id="aval_imc_display" class="hidden p-2 rounded-lg bg-white border text-center transition"></div>
+
+        <div class="space-y-2 pt-2 border-t">
+          <div class="flex justify-between items-center">
+            <span class="text-xs font-semibold text-gray-700">Métricas Customizadas</span>
+            <button type="button" onclick="adicionarCampoMetrica()" class="text-xs text-red-700 font-bold hover:underline flex items-center gap-1">
+              + Adicionar Métrica
+            </button>
+          </div>
+          <div id="containerMetricasCustom" class="space-y-2"></div>
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold mb-1">Observações do Treinador</label>
+          <textarea id="aval_observacoes" placeholder="Ex: Ótima evolução no condicionamento..." class="w-full border rounded-lg p-2 text-sm focus:ring-2 focus:ring-red-500" rows="2"></textarea>
+        </div>
+
+        <div class="flex justify-end">
+          <button type="submit" class="bg-red-600 hover:bg-red-700 text-white font-bold text-sm px-5 py-2 rounded-lg shadow">
+            Salvar Avaliação
+          </button>
+        </div>
+      </form>
+
+      <div>
+        <h3 class="font-bold text-gray-700 text-sm uppercase tracking-wide mb-3 flex items-center gap-1">
+          <span>📜</span> Histórico de Avaliações
+        </h3>
+        <div id="listaHistoricoAvaliacoes" class="space-y-3">
+          <p class="text-gray-400 text-sm text-center py-4">Carregando histórico...</p>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- SCRIPT DE INTEGRAÇÃO E LÓGICA -->
+  <script>
+    let turmaFiltroAtual = '';
+    let alunoSelecionadoId = null;
+    let fotoBase64Atual = ''; // Guarda a imagem capturada em texto Base64
+
+    document.addEventListener('DOMContentLoaded', carregarAlunos);
+
+    // Processar foto da câmera e converter em Base64
+    function processarFoto(event) {
+      const arquivo = event.target.files[0];
+      if (arquivo) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          fotoBase64Atual = e.target.result;
+          document.getElementById('previewFotoContainer').innerHTML = `
+            <img src="${fotoBase64Atual}" class="w-full h-full object-cover rounded-full">
+          `;
+        };
+        reader.readAsDataURL(arquivo);
+      }
+    }
+
+    async function carregarAlunos() {
+      const busca = document.getElementById('campoBusca').value;
+      const url = `/api/alunos?busca=${encodeURIComponent(busca)}&turma=${encodeURIComponent(turmaFiltroAtual)}`;
+
+      try {
+        const resposta = await fetch(url);
+        const alunos = await resposta.json();
+        renderizarAlunos(alunos);
+      } catch (erro) {
+        console.error("Erro ao carregar alunos:", erro);
+        document.getElementById('listaAlunos').innerHTML = `<p class="text-red-500 text-center col-span-2">Erro ao conectar com o servidor.</p>`;
+      }
+    }
+
+    function renderizarAlunos(alunos) {
+      const container = document.getElementById('listaAlunos');
+
+      if (alunos.length === 0) {
+        container.innerHTML = `
+          <div class="col-span-2 text-center py-12 bg-white rounded-xl shadow">
+            <span class="text-4xl">👻</span>
+            <p class="text-gray-500 mt-2 text-lg">Nenhum atleta encontrado.</p>
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = alunos.map(aluno => {
+        const zapLimpo = (aluno.telefone_whatsapp || '').replace(/\D/g, '');
+        const linkZap = zapLimpo ? `https://wa.me/55${zapLimpo}` : '#';
+
+        // Renderizar Foto se existir ou Ícone do Fantasma
+        const fotoHtml = aluno.foto_url
+          ? `<img src="${aluno.foto_url}" class="w-12 h-12 rounded-full object-cover border-2 border-red-500 shrink-0">`
+          : `<div class="w-12 h-12 rounded-full bg-red-100 text-red-600 flex items-center justify-center text-xl border-2 border-red-500 shrink-0">👻</div>`;
+
+        return `
+          <div class="bg-white rounded-xl shadow p-5 border-l-4 border-red-600 hover:shadow-md transition flex flex-col justify-between">
+            <div>
+              <div class="flex justify-between items-start mb-2 gap-3">
+                <div class="flex items-center gap-3">
+                  ${fotoHtml}
+                  <div>
+                    <h3 class="text-xl font-bold text-gray-800 leading-tight">${aluno.nome}</h3>
+                    <div class="mt-1">
+                      <span class="inline-block bg-red-100 text-red-800 text-xs px-2.5 py-0.5 rounded-full font-semibold">
+                        ${aluno.turma || 'Sem Categoria'}
+                      </span>
+                      ${aluno.posicao ? `<span class="inline-block bg-gray-100 text-gray-700 text-xs px-2.5 py-0.5 rounded-full font-medium ml-1">${aluno.posicao}</span>` : ''}
+                    </div>
+                  </div>
+                </div>
+                
+                ${zapLimpo ? `
+                  <a href="${linkZap}" target="_blank" class="bg-emerald-500 hover:bg-emerald-600 text-white p-2.5 rounded-full shadow transition flex items-center justify-center shrink-0" title="Chamar no WhatsApp">
+                    💬
+                  </a>
+                ` : ''}
+              </div>
+
+              <div class="text-sm text-gray-600 space-y-1 border-t pt-2 mt-2">
+                <p>👤 <strong>Resp:</strong> ${aluno.responsavel_nome || 'Não informado'} ${aluno.parentesco ? `(${aluno.parentesco})` : ''}</p>
+                ${aluno.observacoes_medicas ? `<p class="text-amber-700 bg-amber-50 p-2 rounded text-xs mt-1">⚠️ ${aluno.observacoes_medicas}</p>` : ''}
+              </div>
+            </div>
+
+            <div class="pt-4 mt-3 border-t flex justify-end">
+              <button onclick="abrirModalAvaliacoes(${aluno.id}, '${aluno.nome}')" class="bg-red-50 hover:bg-red-100 text-red-700 font-bold text-xs px-3.5 py-2 rounded-lg border border-red-200 transition flex items-center gap-1.5">
+                📊 Avaliações Físicas
+              </button>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function filtrarTurma(turma) {
+      turmaFiltroAtual = turma;
+      carregarAlunos();
+    }
+
+    // Modal Cadastro Aluno
+    function abrirModalCadastro() { 
+      fotoBase64Atual = '';
+      document.getElementById('previewFotoContainer').innerHTML = '👻';
+      document.getElementById('modalCadastro').classList.remove('hidden'); 
+    }
+
+    function fecharModalCadastro() {
+      document.getElementById('modalCadastro').classList.add('hidden');
+      document.getElementById('formAluno').reset();
+      fotoBase64Atual = '';
+      document.getElementById('previewFotoContainer').innerHTML = '👻';
+    }
+
+    async function salvarAluno(event) {
+      event.preventDefault();
+      const novoAluno = {
+        nome: document.getElementById('nome').value,
+        data_nascimento: document.getElementById('data_nascimento').value,
+        turma: document.getElementById('turma').value,
+        posicao: document.getElementById('posicao').value,
+        foto_url: fotoBase64Atual, // Envia a imagem capturada
+        observacoes_medicas: document.getElementById('observacoes_medicas').value,
+        responsavel: {
+          nome: document.getElementById('resp_nome').value,
+          parentesco: document.getElementById('resp_parentesco').value,
+          telefone_whatsapp: document.getElementById('resp_telefone').value
+        }
+      };
+
+      try {
+        const resposta = await fetch('/api/alunos', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(novoAluno)
+        });
+
+        if (resposta.ok) {
+          fecharModalCadastro();
+          carregarAlunos();
+        } else {
+          alert('Erro ao cadastrar aluno.');
+        }
+      } catch (erro) {
+        console.error("Erro:", erro);
+      }
+    }
+
+    // Modal Avaliações Físicas
+    function abrirModalAvaliacoes(idAluno, nomeAluno) {
+      alunoSelecionadoId = idAluno;
+      document.getElementById('tituloModalAvaliacao').innerText = `📊 Avaliações: ${nomeAluno}`;
+      document.getElementById('modalAvaliacoes').classList.remove('hidden');
+      document.getElementById('containerMetricasCustom').innerHTML = '';
+      document.getElementById('formAvaliacao').reset();
+      document.getElementById('aval_imc_display').classList.add('hidden');
+      carregarHistoricoAvaliacoes(idAluno);
+    }
+
+    function fecharModalAvaliacoes() {
+      document.getElementById('modalAvaliacoes').classList.add('hidden');
+      alunoSelecionadoId = null;
+    }
+
+    function calcularIMC() {
+      const peso = parseFloat(document.getElementById('aval_peso').value) || 0;
+      const alturaCm = parseFloat(document.getElementById('aval_altura').value) || 0;
+      const display = document.getElementById('aval_imc_display');
+
+      if (peso > 0 && alturaCm > 0) {
+        const alturaM = alturaCm / 100;
+        const imc = (peso / (alturaM * alturaM)).toFixed(2);
+        let texto = '';
+        let corClasse = '';
+
+        if (imc < 18.5) { texto = 'Abaixo do peso'; corClasse = 'text-amber-600 bg-amber-50 border-amber-200'; }
+        else if (imc < 25) { texto = 'Peso ideal'; corClasse = 'text-emerald-600 bg-emerald-50 border-emerald-200 font-bold'; }
+        else if (imc < 30) { texto = 'Sobrepeso'; corClasse = 'text-amber-600 bg-amber-50 border-amber-200'; }
+        else { texto = 'Obesidade'; corClasse = 'text-red-600 bg-red-50 border-red-200 font-bold'; }
+
+        display.innerHTML = `IMC Calculado: <strong>${imc}</strong> (${texto})`;
+        display.className = `p-2 rounded-lg border text-center text-sm ${corClasse}`;
+        display.classList.remove('hidden');
+      } else {
+        display.classList.add('hidden');
+      }
+    }
+
+    function adicionarCampoMetrica() {
+      const container = document.getElementById('containerMetricasCustom');
+      const div = document.createElement('div');
+      div.className = 'flex gap-2 items-center item-metrica-custom';
+      div.innerHTML = `
+        <input type="text" placeholder="Nome (ex: Salto Vertical)" class="w-1/2 border rounded-lg p-2 text-xs input-metrica-nome" required>
+        <input type="text" placeholder="Valor (ex: 30 cm)" class="w-1/2 border rounded-lg p-2 text-xs input-metrica-valor" required>
+        <button type="button" onclick="this.parentElement.remove()" class="text-red-500 font-bold px-2 hover:bg-red-50 rounded">✕</button>
+      `;
+      container.appendChild(div);
+    }
+
+    async function carregarHistoricoAvaliacoes(alunoId) {
+      const container = document.getElementById('listaHistoricoAvaliacoes');
+      container.innerHTML = '<p class="text-gray-400 text-sm text-center py-4">Carregando...</p>';
+
+      try {
+        const resposta = await fetch(`/api/alunos/${alunoId}/avaliacoes`);
+        const avaliacoes = await resposta.json();
+
+        if (avaliacoes.length === 0) {
+          container.innerHTML = '<p class="text-gray-400 text-sm text-center py-4">Nenhuma avaliação física registrada para este atleta.</p>';
+          return;
+        }
+
+        container.innerHTML = avaliacoes.map(aval => {
+          const dataFormatada = new Date(aval.data_avaliacao).toLocaleDateString('pt-BR');
+
+          const metricasHtml = (aval.metricas_customizadas || []).map(m => `
+            <span class="inline-block bg-gray-100 text-gray-700 text-xs px-2 py-1 rounded border mr-1 mb-1">
+              <strong>${m.nome_metrica}:</strong> ${m.valor}
+            </span>
+          `).join('');
+
+          return `
+            <div class="bg-white p-4 rounded-xl border shadow-sm space-y-2">
+              <div class="flex justify-between items-center text-xs text-gray-500 border-b pb-2">
+                <span>📅 <strong>Data:</strong> ${dataFormatada}</span>
+                <span class="bg-red-50 text-red-700 font-bold px-2 py-0.5 rounded">IMC: ${aval.imc}</span>
+              </div>
+
+              <div class="grid grid-cols-3 gap-2 text-xs font-medium text-gray-700 py-1">
+                <div>⚖️ Peso: <strong>${aval.peso_kg} kg</strong></div>
+                <div>📏 Altura: <strong>${aval.altura_cm} cm</strong></div>
+                <div>🤸 Alongamento: <strong>${aval.alongamento_cm || 0} cm</strong></div>
+              </div>
+
+              ${metricasHtml ? `<div class="pt-1">${metricasHtml}</div>` : ''}
+              ${aval.observacoes ? `<p class="text-xs text-gray-600 bg-gray-50 p-2 rounded italic">"${aval.observacoes}"</p>` : ''}
+            </div>
+          `;
+        }).join('');
+
+      } catch (erro) {
+        console.error("Erro ao buscar avaliações:", erro);
+        container.innerHTML = '<p class="text-red-500 text-sm text-center">Erro ao carregar histórico.</p>';
+      }
+    }
+
+    async function salvarAvaliacao(event) {
+      event.preventDefault();
+      if (!alunoSelecionadoId) return;
+
+      const itensMetricas = document.querySelectorAll('.item-metrica-custom');
+      const metricas_customizadas = [];
+      itensMetricas.forEach(item => {
+        const nome = item.querySelector('.input-metrica-nome').value;
+        const valor = item.querySelector('.input-metrica-valor').value;
+        if (nome && valor) {
+          metricas_customizadas.push({ nome_metrica: nome, valor: valor });
+        }
+      });
+
+      const dadosAvaliacao = {
+        peso_kg: parseFloat(document.getElementById('aval_peso').value),
+        altura_cm: parseFloat(document.getElementById('aval_altura').value),
+        alongamento_cm: parseFloat(document.getElementById('aval_alongamento').value) || 0,
+        observacoes: document.getElementById('aval_observacoes').value,
+        metricas_customizadas: metricas_customizadas
+      };
+
+      try {
+        const resposta = await fetch(`/api/alunos/${alunoSelecionadoId}/avaliacoes`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(dadosAvaliacao)
+        });
+
+        if (resposta.ok) {
+          document.getElementById('formAvaliacao').reset();
+          document.getElementById('containerMetricasCustom').innerHTML = '';
+          document.getElementById('aval_imc_display').classList.add('hidden');
+          carregarHistoricoAvaliacoes(alunoSelecionadoId);
+        } else {
+          alert('Erro ao registrar avaliação.');
+        }
+      } catch (erro) {
+        console.error("Erro ao salvar avaliação:", erro);
+      }
+    }
+  </script>
+
+  <!-- Service Worker do PWA -->
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/service-worker.js')
+          .then(() => console.log('PWA do Fantasminha FC ativado!'))
+          .catch(err => console.error('Erro ao ativar PWA:', err));
+      });
+    }
+  </script>
+</body>
+</html>

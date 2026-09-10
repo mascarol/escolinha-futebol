@@ -1,0 +1,26 @@
+{
+  "name": "escolinha-futebol",
+  "version": "1.0.0",
+  "description": "⚽ Sistema de Gestão e Avaliação Física - Escolinha de Futebol",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mascarol/escolinha-futebol.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/mascarol/escolinha-futebol/issues"
+  },
+  "homepage": "https://github.com/mascarol/escolinha-futebol#readme",
+  "dependencies": {
+    "cors": "^2.8.6",
+    "express": "^5.2.1",
+    "sqlite3": "^6.0.1"
+  }
+}
