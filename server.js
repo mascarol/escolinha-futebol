@@ -6,138 +6,167 @@ const path = require('path');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Middlewares
 app.use(cors());
-app.use(express.json());
+app.use(express.json({ limit: '10mb' }));
 app.use(express.static('public'));
 
-// Conexão e Inicialização do Banco de Dados SQLite
-const db = new sqlite3.Database(path.join(__dirname, 'escolinha.db'), (err) => {
-    if (err) console.error('Erro ao conectar ao banco de dados:', err);
+// Conexão com o banco de dados SQLite
+const dbPath = path.resolve(__dirname, 'escolinha.db');
+const db = new sqlite3.Database(dbPath, (err) => {
+    if (err) console.error('Erro ao conectar ao banco:', err.message);
     else console.log('Conectado ao banco de dados SQLite.');
 });
 
-const dbRun = (sql, params = []) => new Promise((resolve, reject) => {
-    db.run(sql, params, function (err) {
-        if (err) reject(err);
-        else resolve(this);
+// Funções auxiliares com Promises para suporte a async/await
+const dbRun = (sql, params = []) => {
+    return new Promise((resolve, reject) => {
+        db.run(sql, params, function (err) {
+            if (err) reject(err);
+            else resolve(this);
+        });
     });
-});
+};
 
-const dbGet = (sql, params = []) => new Promise((resolve, reject) => {
-    db.get(sql, params, (err, row) => {
-        if (err) reject(err);
-        else resolve(row);
+const dbGet = (sql, params = []) => {
+    return new Promise((resolve, reject) => {
+        db.get(sql, params, (err, row) => {
+            if (err) reject(err);
+            else resolve(row);
+        });
     });
-});
+};
 
-const dbAll = (sql, params = []) => new Promise((resolve, reject) => {
-    db.all(sql, params, (err, rows) => {
-        if (err) reject(err);
-        else resolve(rows);
+const dbAll = (sql, params = []) => {
+    return new Promise((resolve, reject) => {
+        db.all(sql, params, (err, rows) => {
+            if (err) reject(err);
+            else resolve(rows);
+        });
     });
-});
+};
 
-// Criar Tabelas
+// Criar tabelas se não existirem
 db.serialize(() => {
     db.run(`
-    CREATE TABLE IF NOT EXISTS alunos (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      nome TEXT NOT NULL,
-      data_nascimento TEXT NOT NULL,
-      posicao TEXT,
-      turma TEXT,
-      foto_url TEXT,
-      observacoes_medicas TEXT,
-      criado_em DATETIME DEFAULT CURRENT_TIMESTAMP
-    )
-  `);
+    CREATE TABLE IF NOT EXISTS alunos(
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    nome TEXT NOT NULL,
+    data_nascimento TEXT NOT NULL,
+    posicao TEXT,
+    turma TEXT,
+    foto_url TEXT,
+    observacoes_medicas TEXT,
+    data_cadastro DATETIME DEFAULT CURRENT_TIMESTAMP
+)
+    `);
 
     db.run(`
-    CREATE TABLE IF NOT EXISTS responsaveis (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      aluno_id INTEGER NOT NULL,
-      nome TEXT NOT NULL,
-      parentesco TEXT,
-      telefone_whatsapp TEXT NOT NULL,
-      cpf TEXT,
-      FOREIGN KEY (aluno_id) REFERENCES alunos(id) ON DELETE CASCADE
+    CREATE TABLE IF NOT EXISTS responsaveis(
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        aluno_id INTEGER NOT NULL,
+        nome TEXT NOT NULL,
+        parentesco TEXT,
+        telefone_whatsapp TEXT NOT NULL,
+        cpf TEXT,
+        FOREIGN KEY(aluno_id) REFERENCES alunos(id) ON DELETE CASCADE
     )
-  `);
+    `);
 
     db.run(`
-    CREATE TABLE IF NOT EXISTS avaliacoes_fisicas (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      aluno_id INTEGER NOT NULL,
-      data_avaliacao TEXT NOT NULL,
-      peso_kg REAL NOT NULL,
-      altura_cm REAL NOT NULL,
-      imc REAL NOT NULL,
-      alongamento_cm REAL,
-      observacoes TEXT,
-      FOREIGN KEY (aluno_id) REFERENCES alunos(id) ON DELETE CASCADE
+    CREATE TABLE IF NOT EXISTS avaliacoes(
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        aluno_id INTEGER NOT NULL,
+        peso_kg REAL NOT NULL,
+        altura_cm REAL NOT NULL,
+        imc REAL NOT NULL,
+        alongamento_cm REAL,
+        observacoes TEXT,
+        data_avaliacao DATETIME DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY(aluno_id) REFERENCES alunos(id) ON DELETE CASCADE
     )
-  `);
+    `);
 
     db.run(`
-    CREATE TABLE IF NOT EXISTS metricas_customizadas (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      avaliacao_id INTEGER NOT NULL,
-      nome_metrica TEXT NOT NULL,
-      valor TEXT NOT NULL,
-      FOREIGN KEY (avaliacao_id) REFERENCES avaliacoes_fisicas(id) ON DELETE CASCADE
+    CREATE TABLE IF NOT EXISTS metricas_customizadas(
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        avaliacao_id INTEGER NOT NULL,
+        nome_metrica TEXT NOT NULL,
+        valor TEXT NOT NULL,
+        FOREIGN KEY(avaliacao_id) REFERENCES avaliacoes(id) ON DELETE CASCADE
     )
-  `);
+    `);
 });
 
-// ROTAS DE ALUNOS E RESPONSÁVEIS
-
-// POST /api/alunos - Cadastrar Aluno e Responsável
-app.post('/api/alunos', async (req, res) => {
+// ======================================================
+// 1. ROTA DE LOGIN UNIFICADO (Campo Único)
+// ======================================================
+app.post('/api/login', async (req, res) => {
     try {
-        const { nome, data_nascimento, posicao, turma, foto_url, observacoes_medicas, responsavel } = req.body;
+        const { credencial } = req.body;
 
-        if (!nome || !data_nascimento || !responsavel || !responsavel.nome || !responsavel.telefone_whatsapp) {
-            return res.status(400).json({ error: 'Campos obrigatórios do aluno e responsável não preenchidos.' });
+        if (!credencial) {
+            return res.status(400).json({ error: 'Por favor, digite a senha ou o CPF.' });
         }
 
-        const alunoResult = await dbRun(
-            `INSERT INTO alunos (nome, data_nascimento, posicao, turma, foto_url, observacoes_medicas) VALUES (?, ?, ?, ?, ?, ?)`,
-            [nome, data_nascimento, posicao || '', turma || '', foto_url || '', observacoes_medicas || '']
-        );
+        const entradaLimpa = credencial.trim();
 
-        const alunoId = alunoResult.lastID;
+        // 1. Verifica se é a senha do Treinador (padrão: 1234)
+        if (entradaLimpa === '1234') {
+            return res.json({ sucesso: true, tipo: 'professor', nome: 'Treinador' });
+        }
 
-        await dbRun(
-            `INSERT INTO responsaveis (aluno_id, nome, parentesco, telefone_whatsapp, cpf) VALUES (?, ?, ?, ?, ?)`,
-            [alunoId, responsavel.nome, responsavel.parentesco || '', responsavel.telefone_whatsapp, responsavel.cpf || '']
-        );
+        // 2. Se não for a senha, trata como CPF ou Telefone do Responsável
+        const cpfOuTel = entradaLimpa.replace(/\D/g, '');
 
-        res.status(201).json({ id: alunoId, message: 'Aluno e responsável cadastrados com sucesso!' });
+        const query = `
+      SELECT r.aluno_id, r.nome as resp_nome, a.nome as aluno_nome 
+      FROM responsaveis r 
+      JOIN alunos a ON a.id = r.aluno_id 
+      WHERE REPLACE(REPLACE(REPLACE(r.cpf, '.', ''), '-', ''), ' ', '') = ?
+    OR REPLACE(REPLACE(REPLACE(r.telefone_whatsapp, '.', ''), '-', ''), ' ', '') = ?
+        `;
+
+        const row = await dbGet(query, [cpfOuTel, cpfOuTel]);
+
+        if (!row) {
+            return res.status(404).json({ error: 'Senha incorreta ou CPF/Telefone não encontrado.' });
+        }
+
+        res.json({
+            sucesso: true,
+            tipo: 'responsavel',
+            alunoId: row.aluno_id,
+            nome: row.resp_nome
+        });
+
     } catch (error) {
-        res.status(500).json({ error: 'Erro ao cadastrar aluno: ' + error.message });
+        res.status(500).json({ error: 'Erro no servidor: ' + error.message });
     }
 });
 
-// GET /api/alunos - Listar todos os alunos (com busca por nome ou turma)
+// ======================================================
+// 2. ROTAS DE ALUNOS E RESPONSÁVEIS
+// ======================================================
+
+// GET /api/alunos - Listar todos os alunos (com busca e filtro de turma)
 app.get('/api/alunos', async (req, res) => {
     try {
         const { busca, turma } = req.query;
         let sql = `
-      SELECT a.*, r.nome as responsavel_nome, r.telefone_whatsapp, r.parentesco 
+      SELECT a.*, r.nome as responsavel_nome, r.telefone_whatsapp, r.parentesco, r.cpf as responsavel_cpf
       FROM alunos a 
       LEFT JOIN responsaveis r ON a.id = r.aluno_id
-      WHERE 1=1
+      WHERE 1 = 1
     `;
         const params = [];
 
         if (busca) {
-            sql += ` AND a.nome LIKE ?`;
-            params.push(`%${busca}%`);
+            sql += ` AND a.nome LIKE ? `;
+            params.push(`% ${busca}% `);
         }
 
         if (turma) {
-            sql += ` AND a.turma = ?`;
+            sql += ` AND a.turma = ? `;
             params.push(turma);
         }
 
@@ -150,112 +179,104 @@ app.get('/api/alunos', async (req, res) => {
     }
 });
 
-// GET /api/alunos/:id - Detalhes do Aluno + Responsável
+// GET /api/alunos/:id - Detalhes de um Aluno
 app.get('/api/alunos/:id', async (req, res) => {
     try {
-        const aluno = await dbGet(`SELECT * FROM alunos WHERE id = ?`, [req.params.id]);
+        const sql = `
+      SELECT a.*, r.nome as responsavel_nome, r.telefone_whatsapp, r.parentesco, r.cpf as responsavel_cpf
+      FROM alunos a
+      LEFT JOIN responsaveis r ON a.id = r.aluno_id
+      WHERE a.id = ?
+    `;
+        const aluno = await dbGet(sql, [req.params.id]);
         if (!aluno) return res.status(404).json({ error: 'Aluno não encontrado.' });
-
-        const responsavel = await dbGet(`SELECT * FROM responsaveis WHERE aluno_id = ?`, [req.params.id]);
-        const avaliacoes = await dbAll(`SELECT * FROM avaliacoes_fisicas WHERE aluno_id = ? ORDER BY data_avaliacao DESC`, [req.params.id]);
-
-        res.json({ ...aluno, responsavel, avaliacoes });
+        res.json(aluno);
     } catch (error) {
         res.status(500).json({ error: 'Erro ao obter dados do aluno: ' + error.message });
     }
 });
 
-// PUT /api/alunos/:id - Atualizar dados do Aluno e Responsável
-app.put('/api/alunos/:id', async (req, res) => {
+// POST /api/alunos - Cadastrar Aluno e Responsável
+app.post('/api/alunos', async (req, res) => {
     try {
         const { nome, data_nascimento, posicao, turma, foto_url, observacoes_medicas, responsavel } = req.body;
-        const alunoId = req.params.id;
 
-        await dbRun(
-            `UPDATE alunos SET nome = ?, data_nascimento = ?, posicao = ?, turma = ?, foto_url = ?, observacoes_medicas = ? WHERE id = ?`,
-            [nome, data_nascimento, posicao, turma, foto_url, observacoes_medicas, alunoId]
-        );
-
-        if (responsavel) {
-            await dbRun(
-                `UPDATE responsaveis SET nome = ?, parentesco = ?, telefone_whatsapp = ?, cpf = ? WHERE aluno_id = ?`,
-                [responsavel.nome, responsavel.parentesco, responsavel.telefone_whatsapp, responsavel.cpf, alunoId]
-            );
+        if (!nome || !data_nascimento || !responsavel || !responsavel.nome || !responsavel.telefone_whatsapp) {
+            return res.status(400).json({ error: 'Campos obrigatórios do aluno e responsável não preenchidos.' });
         }
 
-        res.json({ message: 'Dados atualizados com sucesso!' });
+        const alunoResult = await dbRun(
+            `INSERT INTO alunos(nome, data_nascimento, posicao, turma, foto_url, observacoes_medicas) VALUES(?, ?, ?, ?, ?, ?)`,
+            [nome, data_nascimento, posicao || '', turma || '', foto_url || '', observacoes_medicas || '']
+        );
+
+        const alunoId = alunoResult.lastID;
+
+        await dbRun(
+            `INSERT INTO responsaveis(aluno_id, nome, parentesco, telefone_whatsapp, cpf) VALUES(?, ?, ?, ?, ?)`,
+            [alunoId, responsavel.nome, responsavel.parentesco || '', responsavel.telefone_whatsapp, responsavel.cpf || '']
+        );
+
+        res.status(201).json({ id: alunoId, message: 'Aluno e responsável cadastrados com sucesso!' });
     } catch (error) {
-        res.status(500).json({ error: 'Erro ao atualizar aluno: ' + error.message });
+        res.status(500).json({ error: 'Erro ao cadastrar aluno: ' + error.message });
     }
 });
 
-// DELETE /api/alunos/:id - Excluir Aluno
-app.delete('/api/alunos/:id', async (req, res) => {
-    try {
-        await dbRun(`DELETE FROM alunos WHERE id = ?`, [req.params.id]);
-        res.json({ message: 'Aluno removido com sucesso!' });
-    } catch (error) {
-        res.status(500).json({ error: 'Erro ao excluir aluno: ' + error.message });
-    }
-});
+// ======================================================
+// 3. ROTAS DE AVALIAÇÕES FÍSICAS
+// ======================================================
 
-// ROTAS DE AVALIAÇÕES FÍSICAS
-
-// POST /api/alunos/:id/avaliacoes - Criar Avaliação Física com cálculo automático de IMC
+// POST /api/alunos/:id/avaliacoes - Salvar Avaliação Física
 app.post('/api/alunos/:id/avaliacoes', async (req, res) => {
     try {
         const alunoId = req.params.id;
-        const { data_avaliacao, peso_kg, altura_cm, alongamento_cm, observacoes, metricas_customizadas } = req.body;
+        const { peso_kg, altura_cm, alongamento_cm, observacoes, metricas_customizadas } = req.body;
 
         if (!peso_kg || !altura_cm) {
-            return res.status(400).json({ error: 'Peso e Altura são obrigatórios.' });
+            return res.status(400).json({ error: 'Peso e altura são obrigatórios.' });
         }
 
-        // Cálculo automático de IMC: peso / (altura em metros)^2
         const alturaM = altura_cm / 100;
-        const imc = Number((peso_kg / (alturaM * alturaM)).toFixed(2));
-        const dataFinal = data_avaliacao || new Date().toISOString().split('T')[0];
+        const imc = parseFloat((peso_kg / (alturaM * alturaM)).toFixed(2));
 
-        const avaliacaoResult = await dbRun(
-            `INSERT INTO avaliacoes_fisicas (aluno_id, data_avaliacao, peso_kg, altura_cm, imc, alongamento_cm, observacoes) VALUES (?, ?, ?, ?, ?, ?, ?)`,
-            [alunoId, dataFinal, peso_kg, altura_cm, imc, alongamento_cm || 0, observacoes || '']
+        const avalResult = await dbRun(
+            `INSERT INTO avaliacoes(aluno_id, peso_kg, altura_cm, imc, alongamento_cm, observacoes) VALUES(?, ?, ?, ?, ?, ?)`,
+            [alunoId, peso_kg, altura_cm, imc, alongamento_cm || 0, observacoes || '']
         );
 
-        const avaliacaoId = avaliacaoResult.lastID;
+        const avaliacaoId = avalResult.lastID;
 
-        // Inserir Métricas Customizadas (se houver)
-        if (metricas_customizadas && Array.isArray(metricas_customizadas)) {
-            for (const metrica of metricas_customizadas) {
-                if (metrica.nome_metrica && metrica.valor) {
-                    await dbRun(
-                        `INSERT INTO metricas_customizadas (avaliacao_id, nome_metrica, valor) VALUES (?, ?, ?)`,
-                        [avaliacaoId, metrica.nome_metrica, metrica.valor]
-                    );
-                }
+        if (metricas_customizadas && metricas_customizadas.length > 0) {
+            for (const m of metricas_customizadas) {
+                await dbRun(
+                    `INSERT INTO metricas_customizadas(avaliacao_id, nome_metrica, valor) VALUES(?, ?, ?)`,
+                    [avaliacaoId, m.nome_metrica, m.valor]
+                );
             }
         }
 
-        res.status(201).json({ id: avaliacaoId, imc, message: 'Avaliação física registrada com sucesso!' });
+        res.status(201).json({ id: avaliacaoId, imc, message: 'Avaliação física salva com sucesso!' });
     } catch (error) {
-        res.status(500).json({ error: 'Erro ao registrar avaliação: ' + error.message });
+        res.status(500).json({ error: 'Erro ao salvar avaliação: ' + error.message });
     }
 });
 
-// GET /api/alunos/:id/avaliacoes - Obter Histórico de Avaliações
+// GET /api/alunos/:id/avaliacoes - Listar Histórico de Avaliações
 app.get('/api/alunos/:id/avaliacoes', async (req, res) => {
     try {
+        const alunoId = req.params.id;
         const avaliacoes = await dbAll(
-            `SELECT * FROM avaliacoes_fisicas WHERE aluno_id = ? ORDER BY data_avaliacao DESC`,
-            [req.params.id]
+            `SELECT * FROM avaliacoes WHERE aluno_id = ? ORDER BY data_avaliacao DESC`,
+            [alunoId]
         );
 
-        // Carregar métricas customizadas para cada avaliação
-        for (let avaliacao of avaliacoes) {
-            const custom = await dbAll(
-                `SELECT nome_metrica, valor FROM metricas_customizadas WHERE avaliacao_id = ?`,
-                [avaliacao.id]
+        for (const aval of avaliacoes) {
+            const metricas = await dbAll(
+                `SELECT nome_metrica, valor FROM metricas_customizadas WHERE avaliacao_id = ? `,
+                [aval.id]
             );
-            avaliacao.metricas_customizadas = custom;
+            aval.metricas_customizadas = metricas || [];
         }
 
         res.json(avaliacoes);
@@ -264,18 +285,7 @@ app.get('/api/alunos/:id/avaliacoes', async (req, res) => {
     }
 });
 
-// DELETE /api/avaliacoes/:id - Excluir Avaliação
-app.delete('/api/avaliacoes/:id', async (req, res) => {
-    try {
-        await dbRun(`DELETE FROM avaliacoes_fisicas WHERE id = ?`, [req.params.id]);
-        res.json({ message: 'Avaliação removida com sucesso!' });
-    } catch (error) {
-        res.status(500).json({ error: 'Erro ao excluir avaliação: ' + error.message });
-    }
-});
-
-// Iniciar o Servidor
+// Inicialização do Servidor
 app.listen(PORT, () => {
-    console.log(`Servidor rodando com sucesso na porta ${PORT}`);
+    console.log(`Servidor Fantasminha FC rodando na porta ${PORT} `);
 });
-
