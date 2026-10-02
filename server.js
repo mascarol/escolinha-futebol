@@ -44,6 +44,30 @@ const dbAll = (sql, params = []) => {
         });
     });
 };
+// Funções auxiliares com Promises para suporte a async/await 
+const dbRun = (sql, params = []) =&gt; { ... }; 
+const dbGet = (sql, params = []) =&gt; { ... }; 
+const dbAll = (sql, params = []) =&gt; { ... }; 
+
+// 📍 INSERIR AQUI A FUNÇÃO DE CÁLCULO DA TURMA 📍 
+function calcularTurmaPorData(dataNascimento) {
+if (!dataNascimento) return 'Não informada'; 
+const hoje = new Date(); 
+const nasc = new Date(dataNascimento); 
+let idade = hoje.getFullYear() - nasc.getFullYear(); 
+const m = hoje.getMonth() - nasc.getMonth(); 
+
+if (m &lt; 0 || (m === 0 &amp;&amp; hoje.getDate() &lt; nasc.getDate())) { 
+idade--; 
+}
+
+if (idade &lt;= 7) return 'Sub-7'; 
+if (idade &lt;= 9) return 'Sub-9'; 
+if (idade &lt;= 11) return 'Sub-11'; 
+if (idade &lt;= 13) return 'Sub-13'; 
+if (idade &lt;= 15) return 'Sub-15'; 
+return 'Sub-17'; 
+}
 
 // Criar tabelas se não existirem
 db.serialize(() => {
