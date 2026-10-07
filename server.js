@@ -230,14 +230,7 @@ app.post('/api/alunos', async (req, res) => {
             [nome, data_nascimento, posicao || '', turma || '', foto_url || '', observacoes_medicas || '']
         );
 
-        const alunoId = alunoResult.lastID;
-
-        await dbRun(
-            `INSERT INTO responsaveis(aluno_id, nome, parentesco, telefone_whatsapp, cpf) VALUES(?, ?, ?, ?, ?)`,
-            [alunoId, responsavel.nome, responsavel.parentesco || '', responsavel.telefone_whatsapp, responsavel.cpf || '']
-        );
-
-        res.status(201).json({ id: alunoId, message: 'Aluno e responsável cadastrados com sucesso!' });
+        res.status(201).json({ id: alunoResult.lastID, message: 'Aluno e responsável cadastrados com sucesso!' });
     } catch (error) {
         res.status(500).json({ error: 'Erro ao cadastrar aluno: ' + error.message });
     }
