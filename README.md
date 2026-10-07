@@ -42,6 +42,7 @@ O banco de dados foi modelado de forma relacional para manter a integridade entr
 ## 📌 Rotas da API (Endpoints)
 
 ### Alunos e Responsáveis
+
 - `POST /api/alunos` — Cadastra um novo aluno com dados do responsável
 - `GET /api/alunos` — Lista todos os alunos (suporta filtro por nome/turma)
 - `GET /api/alunos/:id` — Retorna os detalhes de um aluno específico
@@ -49,9 +50,9 @@ O banco de dados foi modelado de forma relacional para manter a integridade entr
 - `DELETE /api/alunos/:id` — Remove o registro do aluno
 
 ### Avaliações Físicas
+
 - `POST /api/alunos/:id/avaliacoes` — Registra uma nova avaliação física para o aluno
 - `GET /api/alunos/:id/avaliacoes` — Retorna o histórico de avaliações do aluno
 - `DELETE /api/avaliacoes/:id` — Remove um registro de avaliação
 
 ---
-

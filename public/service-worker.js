@@ -1,23 +1,23 @@
-const CACHE_NAME = 'escolinha-v1';
+const CACHE_NAME = "escolinha-v1";
 const ASSETS_TO_CACHE = [
-  '/',
-  '/index.html',
-  '/manifest.json',
-  'https://cdn.tailwindcss.com'
+  "/",
+  "/index.html",
+  "/manifest.json",
+  "https://cdn.tailwindcss.com",
 ];
 
 // Instalação do Service Worker e cache dos arquivos estáticos
-self.addEventListener('install', (event) => {
+self.addEventListener("install", (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
       return cache.addAll(ASSETS_TO_CACHE);
-    })
+    }),
   );
   self.skipWaiting();
 });
 
 // Limpeza de caches antigos
-self.addEventListener('activate', (event) => {
+self.addEventListener("activate", (event) => {
   event.waitUntil(
     caches.keys().then((cacheNames) => {
       return Promise.all(
@@ -25,17 +25,17 @@ self.addEventListener('activate', (event) => {
           if (cache !== CACHE_NAME) {
             return caches.delete(cache);
           }
-        })
+        }),
       );
-    })
+    }),
   );
   self.clients.claim();
 });
 
 // Interceptação de requisições (Carrega da rede, fallback para o cache)
-self.addEventListener('fetch', (event) => {
+self.addEventListener("fetch", (event) => {
   // Chamadas de API passam direto pela rede sem cache estático
-  if (event.request.url.includes('/api/')) {
+  if (event.request.url.includes("/api/")) {
     event.respondWith(fetch(event.request));
     return;
   }
@@ -54,6 +54,6 @@ self.addEventListener('fetch', (event) => {
         }
         return networkResponse;
       });
-    })
+    }),
   );
 });
