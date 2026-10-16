@@ -1,1 +1,1 @@
-node_modules
+cat &lt;&lt; 'EOF' &gt; .gitignore node\_modules/ \*.db \*.sqlite \*.log .env EOF
