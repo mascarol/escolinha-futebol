@@ -11,7 +11,7 @@ app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
 // Conexão com o banco SQLite
-const db = new sqlite3.Database('./escolinha.db', (err) => {
+const db = new sqlite3.Database(path.join(__dirname, 'escolinha.db'), (err) => {
   if (err) {
     console.error('Erro ao conectar ao SQLite:', err.message);
   } else {
@@ -365,7 +365,6 @@ app.post('/api/alunos/:id/pagamento-manual', (req, res) => {
     }
   );
 });
-
 // Iniciar servidor
 app.listen(PORT, () => {
   console.log(`Servidor rodando na porta ${PORT}`);

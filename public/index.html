@@ -1,777 +1,601 @@
 <!doctype html>
 <html lang="pt-BR">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Fantasminha Futebol Clube 👻⚽</title>
 
-    <!-- Meta tags do PWA -->
-    <link rel="manifest" href="/manifest.json" />
-    <meta name="theme-color" content="#dc2626" />
-    <meta name="mobile-web-app-capable" content="yes" />
-    <meta
-      name="apple-mobile-web-app-status-bar-style"
-      content="black-translucent"
-    />
-    <meta name="apple-mobile-web-app-title" content="Fantasminha FC" />
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#dc2626">
+  <title>Fantasminha Futebol Clube 👻⚽</title>
 
-    <!-- Tailwind CSS para estilo moderno -->
-    <script src="https://cdn.tailwindcss.com"></script>
-  </head>
-  <body class="bg-gray-100 min-h-screen text-gray-800 font-sans pb-10">
-    <!-- CABEÇALHO -->
-    <header class="bg-red-600 text-white shadow-md p-4 sticky top-0 z-10">
-      <div class="max-w-4xl mx-auto flex justify-between items-center">
-        <div class="flex items-center gap-2">
-          <span class="text-3xl">👻⚽</span>
-          <div>
-            <h1 class="text-xl font-black tracking-wide uppercase leading-none">
-              Fantasminha FC
-            </h1>
-            <p class="text-xs text-red-100 font-medium">Escolinha de Futebol</p>
-          </div>
-        </div>
-        <button
-          onclick="abrirModalCadastro()"
-          class="bg-white hover:bg-gray-100 text-red-700 font-bold px-4 py-2 rounded-lg shadow flex items-center gap-1 transition text-sm md:text-base"
-        >
-          <span class="text-xl font-bold">+</span> Novo Aluno
-        </button>
-      </div>
-    </header>
+  <link rel="manifest" href="/manifest.json">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Fantasminha FC">
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
 
-    <!-- CONTEÚDO PRINCIPAL -->
-    <main class="max-w-4xl mx-auto p-4">
-      <!-- BARRA DE BUSCA E FILTROS -->
-      <section
-        class="bg-white p-4 rounded-xl shadow mb-6 space-y-3 border-t-4 border-red-600"
-      >
-        <div class="flex gap-2">
-          <input
-            type="text"
-            id="campoBusca"
-            placeholder="🔍 Buscar aluno por nome..."
-            class="w-full border border-gray-300 rounded-lg px-4 py-3 text-lg focus:outline-none focus:ring-2 focus:ring-red-500"
-            oninput="carregarAlunos()"
-          />
-        </div>
-
-        <!-- Atalhos de Categoria/Turma -->
-        <div class="flex gap-2 overflow-x-auto pb-1 text-sm">
-          <button
-            onclick="filtrarTurma('')"
-            class="bg-gray-200 hover:bg-red-600 hover:text-white px-3 py-1.5 rounded-full font-medium whitespace-nowrap"
-          >
-            Todas as Turmas
-          </button>
-          <button
-            onclick="filtrarTurma('Sub-7')"
-            class="bg-gray-200 hover:bg-red-600 hover:text-white px-3 py-1.5 rounded-full font-medium whitespace-nowrap"
-          >
-            Sub-7
-          </button>
-          <button
-            onclick="filtrarTurma('Sub-9')"
-            class="bg-gray-200 hover:bg-red-600 hover:text-white px-3 py-1.5 rounded-full font-medium whitespace-nowrap"
-          >
-            Sub-9
-          </button>
-          <button
-            onclick="filtrarTurma('Sub-11')"
-            class="bg-gray-200 hover:bg-red-600 hover:text-white px-3 py-1.5 rounded-full font-medium whitespace-nowrap"
-          >
-            Sub-11
-          </button>
-          <button
-            onclick="filtrarTurma('Sub-13')"
-            class="bg-gray-200 hover:bg-red-600 hover:text-white px-3 py-1.5 rounded-full font-medium whitespace-nowrap"
-          >
-            Sub-13
-          </button>
-          <button
-            onclick="filtrarTurma('Sub-15')"
-            class="bg-gray-200 hover:bg-red-600 hover:text-white px-3 py-1.5 rounded-full font-medium whitespace-nowrap"
-          >
-            Sub-15
-          </button>
-        </div>
-      </section>
-
-      <!-- LISTA DE ALUNOS -->
-      <section id="listaAlunos" class="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <p class="text-center text-gray-500 col-span-2 py-8">
-          Carregando alunos do Fantasminha FC...
-        </p>
-      </section>
-    </main>
-
-    <!-- MODAL DE CADASTRO DE ALUNO -->
-    <div
-      id="modalCadastro"
-      class="fixed inset-0 bg-black/60 hidden flex items-center justify-center p-4 z-50"
-    >
-      <div
-        class="bg-white rounded-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto p-6 shadow-2xl relative"
-      >
-        <button
-          onclick="fecharModalCadastro()"
-          class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 text-2xl font-bold"
-        >
-          &times;
-        </button>
-
-        <h2
-          class="text-2xl font-bold text-red-700 mb-4 flex items-center gap-2"
-        >
-          <span>📋</span> Cadastrar Novo Aluno
-        </h2>
-
-        <form id="formAluno" onsubmit="salvarAluno(event)" class="space-y-4">
-          <!-- FOTO DO ATLETA VIA CÂMERA -->
-          <div class="bg-gray-50 p-3 rounded-xl border flex items-center gap-4">
-            <div
-              id="previewFotoContainer"
-              class="w-16 h-16 rounded-full bg-red-100 border-2 border-red-500 flex items-center justify-center overflow-hidden text-2xl shrink-0"
-            >
-              👻
-            </div>
-            <div>
-              <label class="block text-xs font-semibold text-gray-700 mb-1"
-                >Foto do Atleta</label
-              >
-              <label
-                class="bg-red-600 hover:bg-red-700 text-white font-bold px-3 py-1.5 rounded-lg shadow text-xs cursor-pointer inline-flex items-center gap-1 transition"
-              >
-                <span>📸</span> Tirar Foto / Câmera
-                <input
-                  type="file"
-                  id="inputFoto"
-                  accept="image/*"
-                  capture="environment"
-                  class="hidden"
-                  onchange="processarFoto(event)"
-                />
-              </label>
-              <p class="text-[10px] text-gray-400 mt-1">
-                Abre a câmera do celular ou arquivo
-              </p>
-            </div>
-          </div>
-
-          <div class="border-b pb-4 space-y-3">
-            <h3
-              class="font-semibold text-gray-700 text-sm tracking-wider uppercase"
-            >
-              Dados do Atleta
-            </h3>
-            <div>
-              <label class="block text-sm font-medium mb-1"
-                >Nome Completo *</label
-              >
-              <input
-                type="text"
-                id="nome"
-                required
-                class="w-full border rounded-lg p-2.5 focus:ring-2 focus:ring-red-500"
-              />
-            </div>
-
-            <div class="grid grid-cols-2 gap-3">
-              <div>
-                <label class="block text-sm font-medium mb-1"
-                  >Data Nasc. *</label
-                >
-                <input
-                  type="date"
-                  id="data_nascimento"
-                  required
-                  class="w-full border rounded-lg p-2.5 focus:ring-2 focus:ring-red-500"
-                />
-              </div>
-              <div>
-                <label class="block text-sm font-medium mb-1"
-                  >Turma / Categoria</label
-                >
-                <select
-                  id="turma"
-                  class="w-full border rounded-lg p-2.5 focus:ring-2 focus:ring-red-500"
-                >
-                  <option value="Sub-7">Sub-7</option>
-                  <option value="Sub-9">Sub-9</option>
-                  <option value="Sub-11" selected>Sub-11</option>
-                  <option value="Sub-13">Sub-13</option>
-                  <option value="Sub-15">Sub-15</option>
-                </select>
-              </div>
-            </div>
-
-            <div>
-              <label class="block text-sm font-medium mb-1"
-                >Posição Preferida</label
-              >
-              <input
-                type="text"
-                id="posicao"
-                placeholder="Ex: Atacante, Goleiro, Meia"
-                class="w-full border rounded-lg p-2.5 focus:ring-2 focus:ring-red-500"
-              />
-            </div>
-
-            <div>
-              <label class="block text-sm font-medium mb-1"
-                >Observações Médicas / Restrições</label
-              >
-              <textarea
-                id="observacoes_medicas"
-                placeholder="Alergias, asma, problemas de saúde..."
-                class="w-full border rounded-lg p-2.5 focus:ring-2 focus:ring-red-500"
-                rows="2"
-              ></textarea>
-            </div>
-          </div>
-
-          <div class="space-y-3 pt-2">
-            <h3
-              class="font-semibold text-gray-700 text-sm tracking-wider uppercase"
-            >
-              Dados do Responsável
-            </h3>
-            <div>
-              <label class="block text-sm font-medium mb-1"
-                >Nome do Responsável *</label
-              >
-              <input
-                type="text"
-                id="resp_nome"
-                required
-                class="w-full border rounded-lg p-2.5 focus:ring-2 focus:ring-red-500"
-              />
-            </div>
-
-            <div class="grid grid-cols-2 gap-3">
-              <div>
-                <label class="block text-sm font-medium mb-1">Parentesco</label>
-                <input
-                  type="text"
-                  id="resp_parentesco"
-                  placeholder="Pai, Mãe, Avô..."
-                  class="w-full border rounded-lg p-2.5 focus:ring-2 focus:ring-red-500"
-                />
-              </div>
-              <div>
-                <label class="block text-sm font-medium mb-1"
-                  >WhatsApp (com DDD) *</label
-                >
-                <input
-                  type="tel"
-                  id="resp_telefone"
-                  placeholder="11999998888"
-                  required
-                  class="w-full border rounded-lg p-2.5 focus:ring-2 focus:ring-red-500"
-                />
-              </div>
-            </div>
-          </div>
-
-          <div class="flex justify-end gap-3 pt-4">
-            <button
-              type="button"
-              onclick="fecharModalCadastro()"
-              class="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg"
-            >
-              Cancelar
-            </button>
-            <button
-              type="submit"
-              class="px-6 py-2 bg-red-600 hover:bg-red-700 text-white font-bold rounded-lg shadow"
-            >
-              Salvar Cadastro
-            </button>
-          </div>
-        </form>
-      </div>
-    </div>
-
-    <!-- MODAL DE AVALIAÇÕES FÍSICAS -->
-    <div
-      id="modalAvaliacoes"
-      class="fixed inset-0 bg-black/60 hidden flex items-center justify-center p-4 z-50"
-    >
-      <div
-        class="bg-white rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto p-6 shadow-2xl relative"
-      >
-        <button
-          onclick="fecharModalAvaliacoes()"
-          class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 text-2xl font-bold"
-        >
-          &times;
-        </button>
-
-        <div class="border-b pb-3 mb-4">
-          <h2
-            id="tituloModalAvaliacao"
-            class="text-2xl font-bold text-red-700 flex items-center gap-2"
-          >
-            📊 Avaliações Físicas
-          </h2>
-          <p
-            id="subtituloModalAvaliacao"
-            class="text-sm text-gray-500 mt-0.5"
-          ></p>
-        </div>
-
-        <!-- FORMULÁRIO DE NOVA AVALIAÇÃO -->
-        <form
-          id="formAvaliacao"
-          onsubmit="salvarAvaliacao(event)"
-          class="bg-gray-50 p-4 rounded-xl border mb-6 space-y-4"
-        >
-          <h3
-            class="font-bold text-gray-700 flex items-center gap-1 text-sm uppercase tracking-wide"
-          >
-            <span>➕</span> Nova Avaliação Física
-          </h3>
-
-          <div class="grid grid-cols-2 md:grid-cols-3 gap-3">
-            <div>
-              <label class="block text-xs font-semibold mb-1"
-                >Peso (kg) *</label
-              >
-              <input
-                type="number"
-                step="0.1"
-                id="aval_peso"
-                required
-                placeholder="Ex: 35.5"
-                oninput="calcularIMC()"
-                class="w-full border rounded-lg p-2 text-sm focus:ring-2 focus:ring-red-500"
-              />
-            </div>
-            <div>
-              <label class="block text-xs font-semibold mb-1"
-                >Altura (cm) *</label
-              >
-              <input
-                type="number"
-                step="1"
-                id="aval_altura"
-                required
-                placeholder="Ex: 140"
-                oninput="calcularIMC()"
-                class="w-full border rounded-lg p-2 text-sm focus:ring-2 focus:ring-red-500"
-              />
-            </div>
-            <div>
-              <label class="block text-xs font-semibold mb-1"
-                >Alongamento (cm)</label
-              >
-              <input
-                type="number"
-                step="0.5"
-                id="aval_alongamento"
-                placeholder="Ex: 22"
-                class="w-full border rounded-lg p-2 text-sm focus:ring-2 focus:ring-red-500"
-              />
-            </div>
-          </div>
-
-          <div
-            id="aval_imc_display"
-            class="hidden p-2 rounded-lg bg-white border text-center transition"
-          ></div>
-
-          <div class="space-y-2 pt-2 border-t">
-            <div class="flex justify-between items-center">
-              <span class="text-xs font-semibold text-gray-700"
-                >Métricas Customizadas</span
-              >
-              <button
-                type="button"
-                onclick="adicionarCampoMetrica()"
-                class="text-xs text-red-700 font-bold hover:underline flex items-center gap-1"
-              >
-                + Adicionar Métrica
-              </button>
-            </div>
-            <div id="containerMetricasCustom" class="space-y-2"></div>
-          </div>
-
-          <div>
-            <label class="block text-xs font-semibold mb-1"
-              >Observações do Treinador</label
-            >
-            <textarea
-              id="aval_observacoes"
-              placeholder="Ex: Ótima evolução no condicionamento..."
-              class="w-full border rounded-lg p-2 text-sm focus:ring-2 focus:ring-red-500"
-              rows="2"
-            ></textarea>
-          </div>
-
-          <div class="flex justify-end">
-            <button
-              type="submit"
-              class="bg-red-600 hover:bg-red-700 text-white font-bold text-sm px-5 py-2 rounded-lg shadow"
-            >
-              Salvar Avaliação
-            </button>
-          </div>
-        </form>
-
+<body class="min-h-screen bg-gray-100 pb-10 font-sans text-gray-800">
+  <header class="sticky top-0 z-10 bg-red-600 p-4 text-white shadow-md">
+    <div class="mx-auto flex max-w-4xl items-center justify-between">
+      <div class="flex items-center gap-2">
+        <span class="text-3xl">👻⚽</span>
         <div>
-          <h3
-            class="font-bold text-gray-700 text-sm uppercase tracking-wide mb-3 flex items-center gap-1"
-          >
-            <span>📜</span> Histórico de Avaliações
-          </h3>
-          <div id="listaHistoricoAvaliacoes" class="space-y-3">
-            <p class="text-gray-400 text-sm text-center py-4">
-              Carregando histórico...
-            </p>
-          </div>
+          <h1 class="text-xl font-black uppercase leading-none tracking-wide">Fantasminha FC</h1>
+          <p class="text-xs font-medium text-red-100">Escolinha de Futebol</p>
         </div>
       </div>
+      <button id="botaoNovoAluno"
+        class="flex items-center gap-1 rounded-lg bg-white px-4 py-2 text-sm font-bold text-red-700 shadow transition hover:bg-gray-100 md:text-base">
+        <span class="text-xl">+</span> Novo Aluno
+      </button>
     </div>
+  </header>
 
-    <!-- SCRIPT DE INTEGRAÇÃO E LÓGICA -->
-    <script>
-      let turmaFiltroAtual = "";
-      let alunoSelecionadoId = null;
-      let fotoBase64Atual = ""; // Guarda a imagem capturada em texto Base64
+  <main class="mx-auto max-w-4xl p-4">
+    <section class="mb-6 space-y-3 rounded-xl border-t-4 border-red-600 bg-white p-4 shadow">
+      <input type="search" id="campoBusca" placeholder="🔍 Buscar aluno por nome..."
+        class="w-full rounded-lg border border-gray-300 px-4 py-3 text-lg focus:outline-none focus:ring-2 focus:ring-red-500">
 
-      document.addEventListener("DOMContentLoaded", carregarAlunos);
+      <div class="flex gap-2 overflow-x-auto pb-1 text-sm">
+        <button
+          class="botao-turma whitespace-nowrap rounded-full bg-gray-200 px-3 py-1.5 font-medium hover:bg-red-600 hover:text-white"
+          data-turma="">Todas as Turmas</button>
+        <button
+          class="botao-turma whitespace-nowrap rounded-full bg-gray-200 px-3 py-1.5 font-medium hover:bg-red-600 hover:text-white"
+          data-turma="Sub-7">Sub-7</button>
+        <button
+          class="botao-turma whitespace-nowrap rounded-full bg-gray-200 px-3 py-1.5 font-medium hover:bg-red-600 hover:text-white"
+          data-turma="Sub-9">Sub-9</button>
+        <button
+          class="botao-turma whitespace-nowrap rounded-full bg-gray-200 px-3 py-1.5 font-medium hover:bg-red-600 hover:text-white"
+          data-turma="Sub-11">Sub-11</button>
+        <button
+          class="botao-turma whitespace-nowrap rounded-full bg-gray-200 px-3 py-1.5 font-medium hover:bg-red-600 hover:text-white"
+          data-turma="Sub-13">Sub-13</button>
+        <button
+          class="botao-turma whitespace-nowrap rounded-full bg-gray-200 px-3 py-1.5 font-medium hover:bg-red-600 hover:text-white"
+          data-turma="Sub-15">Sub-15</button>
+      </div>
+    </section>
 
-      // Processar foto da câmera e converter em Base64
-      function processarFoto(event) {
-        const arquivo = event.target.files[0];
-        if (arquivo) {
-          const reader = new FileReader();
-          reader.onload = function (e) {
-            fotoBase64Atual = e.target.result;
-            document.getElementById("previewFotoContainer").innerHTML = `
-            <img src="${fotoBase64Atual}" class="w-full h-full object-cover rounded-full">
-          `;
-          };
-          reader.readAsDataURL(arquivo);
-        }
-      }
+    <div id="mensagem" aria-live="polite"></div>
+    <section id="listaAlunos" class="grid grid-cols-1 gap-4 md:grid-cols-2" aria-live="polite"></section>
+  </main>
 
-      async function carregarAlunos() {
-        const busca = document.getElementById("campoBusca").value;
-        const url = `/api/alunos?busca=${encodeURIComponent(busca)}&turma=${encodeURIComponent(turmaFiltroAtual)}`;
+  <!-- Modal de cadastro -->
+  <div id="modalCadastro" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/60 p-4">
+    <div class="relative max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-2xl bg-white p-6 shadow-2xl">
+      <button type="button"
+        class="fechar-modal absolute right-4 top-4 text-2xl font-bold text-gray-400 hover:text-gray-700"
+        data-modal="modalCadastro" aria-label="Fechar">&times;</button>
+      <h2 class="mb-4 flex items-center gap-2 text-2xl font-bold text-red-700">📋 Cadastrar Novo Aluno</h2>
 
-        try {
-          const resposta = await fetch(url);
-          const alunos = await resposta.json();
-          renderizarAlunos(alunos);
-        } catch (erro) {
-          console.error("Erro ao carregar alunos:", erro);
-          document.getElementById("listaAlunos").innerHTML =
-            `<p class="text-red-500 text-center col-span-2">Erro ao conectar com o servidor.</p>`;
-        }
-      }
-
-      function renderizarAlunos(alunos) {
-        const container = document.getElementById("listaAlunos");
-
-        if (alunos.length === 0) {
-          container.innerHTML = `
-          <div class="col-span-2 text-center py-12 bg-white rounded-xl shadow">
-            <span class="text-4xl">👻</span>
-            <p class="text-gray-500 mt-2 text-lg">Nenhum atleta encontrado.</p>
+      <form id="formAluno" class="space-y-4">
+        <div class="flex items-center gap-4 rounded-xl border bg-gray-50 p-3">
+          <div id="previewFoto"
+            class="flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-full border-2 border-red-500 bg-red-100 text-2xl">
+            👻</div>
+          <div>
+            <label class="mb-1 block text-xs font-semibold">Foto do atleta</label>
+            <input type="file" id="inputFoto" accept="image/*" capture="environment" class="block max-w-full text-xs">
+            <p class="mt-1 text-[10px] text-gray-400">Selecione uma foto ou use a câmera do celular.</p>
           </div>
-        `;
-          return;
-        }
+        </div>
 
-        container.innerHTML = alunos
-          .map((aluno) => {
-            const zapLimpo = (aluno.telefone_whatsapp || "").replace(/\D/g, "");
-            const linkZap = zapLimpo ? `https://wa.me/55${zapLimpo}` : "#";
+        <div class="space-y-3 border-b pb-4">
+          <h3 class="text-sm font-semibold uppercase tracking-wider text-gray-700">Dados do atleta</h3>
+          <div>
+            <label for="nome" class="mb-1 block text-sm font-medium">Nome completo *</label>
+            <input id="nome" required class="w-full rounded-lg border p-2.5 focus:ring-2 focus:ring-red-500">
+          </div>
 
-            // Renderizar Foto se existir ou Ícone do Fantasma
-            const fotoHtml = aluno.foto_url
-              ? `<img src="${aluno.foto_url}" class="w-12 h-12 rounded-full object-cover border-2 border-red-500 shrink-0">`
-              : `<div class="w-12 h-12 rounded-full bg-red-100 text-red-600 flex items-center justify-center text-xl border-2 border-red-500 shrink-0">👻</div>`;
-
-            return `
-          <div class="bg-white rounded-xl shadow p-5 border-l-4 border-red-600 hover:shadow-md transition flex flex-col justify-between">
+          <div class="grid grid-cols-2 gap-3">
             <div>
-              <div class="flex justify-between items-start mb-2 gap-3">
+              <label for="data_nascimento" class="mb-1 block text-sm font-medium">Data de nascimento *</label>
+              <input type="date" id="data_nascimento" required
+                class="w-full rounded-lg border p-2.5 focus:ring-2 focus:ring-red-500">
+            </div>
+            <div>
+              <label for="turma" class="mb-1 block text-sm font-medium">Turma</label>
+              <select id="turma" class="w-full rounded-lg border p-2.5 focus:ring-2 focus:ring-red-500">
+                <option value="Sub-7">Sub-7</option>
+                <option value="Sub-9">Sub-9</option>
+                <option value="Sub-11" selected>Sub-11</option>
+                <option value="Sub-13">Sub-13</option>
+                <option value="Sub-15">Sub-15</option>
+                <option value="Sub-17">Sub-17</option>
+              </select>
+            </div>
+          </div>
+
+          <div>
+            <label for="posicao" class="mb-1 block text-sm font-medium">Posição preferida</label>
+            <input id="posicao" placeholder="Ex.: Atacante, Goleiro, Meia"
+              class="w-full rounded-lg border p-2.5 focus:ring-2 focus:ring-red-500">
+          </div>
+
+          <div>
+            <label for="observacoes_medicas" class="mb-1 block text-sm font-medium">Observações médicas</label>
+            <textarea id="observacoes_medicas" rows="2" placeholder="Alergias, restrições ou observações"
+              class="w-full rounded-lg border p-2.5 focus:ring-2 focus:ring-red-500"></textarea>
+          </div>
+        </div>
+
+        <div class="space-y-3 pt-2">
+          <h3 class="text-sm font-semibold uppercase tracking-wider text-gray-700">Dados do responsável</h3>
+          <div>
+            <label for="resp_nome" class="mb-1 block text-sm font-medium">Nome do responsável *</label>
+            <input id="resp_nome" required class="w-full rounded-lg border p-2.5 focus:ring-2 focus:ring-red-500">
+          </div>
+
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label for="resp_parentesco" class="mb-1 block text-sm font-medium">Parentesco</label>
+              <input id="resp_parentesco" placeholder="Pai, Mãe, Avô..."
+                class="w-full rounded-lg border p-2.5 focus:ring-2 focus:ring-red-500">
+            </div>
+            <div>
+              <label for="resp_telefone" class="mb-1 block text-sm font-medium">WhatsApp *</label>
+              <input type="tel" id="resp_telefone" required placeholder="11999998888"
+                class="w-full rounded-lg border p-2.5 focus:ring-2 focus:ring-red-500">
+            </div>
+          </div>
+
+          <div>
+            <label for="resp_cpf" class="mb-1 block text-sm font-medium">CPF do responsável</label>
+            <input id="resp_cpf" class="w-full rounded-lg border p-2.5 focus:ring-2 focus:ring-red-500">
+          </div>
+        </div>
+
+        <div id="erroCadastro" class="text-sm text-red-600" aria-live="polite"></div>
+        <div class="flex justify-end gap-3 pt-2">
+          <button type="button" class="fechar-modal rounded-lg px-4 py-2 text-gray-600 hover:bg-gray-100"
+            data-modal="modalCadastro">Cancelar</button>
+          <button type="submit"
+            class="rounded-lg bg-red-600 px-6 py-2 font-bold text-white shadow hover:bg-red-700">Salvar
+            cadastro</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal de avaliações -->
+  <div id="modalAvaliacoes" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/60 p-4">
+    <div class="relative max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-2xl bg-white p-6 shadow-2xl">
+      <button type="button"
+        class="fechar-modal absolute right-4 top-4 text-2xl font-bold text-gray-400 hover:text-gray-700"
+        data-modal="modalAvaliacoes" aria-label="Fechar">&times;</button>
+      <h2 id="tituloAvaliacao" class="mb-1 text-2xl font-bold text-red-700">📊 Avaliações físicas</h2>
+      <p id="subtituloAvaliacao" class="mb-4 text-sm text-gray-500"></p>
+
+      <form id="formAvaliacao" class="mb-6 space-y-4 rounded-xl border bg-gray-50 p-4">
+        <h3 class="text-sm font-bold uppercase tracking-wide text-gray-700">Nova avaliação</h3>
+        <div class="grid grid-cols-2 gap-3 md:grid-cols-3">
+          <div>
+            <label for="aval_peso" class="mb-1 block text-xs font-semibold">Peso (kg) *</label>
+            <input type="number" min="0.1" step="0.1" id="aval_peso" required
+              class="w-full rounded-lg border p-2 text-sm">
+          </div>
+          <div>
+            <label for="aval_altura" class="mb-1 block text-xs font-semibold">Altura (cm) *</label>
+            <input type="number" min="1" step="0.1" id="aval_altura" required
+              class="w-full rounded-lg border p-2 text-sm">
+          </div>
+          <div>
+            <label for="aval_alongamento" class="mb-1 block text-xs font-semibold">Alongamento (cm)</label>
+            <input type="number" min="0" step="0.1" id="aval_alongamento" class="w-full rounded-lg border p-2 text-sm">
+          </div>
+        </div>
+        <div id="imcDisplay" class="hidden rounded-lg border bg-white p-2 text-center text-sm"></div>
+        <div>
+          <label for="aval_observacoes" class="mb-1 block text-xs font-semibold">Observações</label>
+          <textarea id="aval_observacoes" rows="2" class="w-full rounded-lg border p-2 text-sm"></textarea>
+        </div>
+        <div id="erroAvaliacao" class="text-sm text-red-600" aria-live="polite"></div>
+        <div class="flex justify-end">
+          <button type="submit"
+            class="rounded-lg bg-red-600 px-5 py-2 text-sm font-bold text-white shadow hover:bg-red-700">Salvar
+            avaliação</button>
+        </div>
+      </form>
+
+      <h3 class="mb-3 text-sm font-bold uppercase tracking-wide text-gray-700">Histórico</h3>
+      <div id="historicoAvaliacoes" class="space-y-3"></div>
+    </div>
+  </div>
+
+  <!-- Modal da ficha do aluno -->
+  <div id="modalFicha" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/60 p-4">
+    <div class="relative max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-2xl bg-white p-6 shadow-2xl">
+      <button type="button"
+        class="fechar-modal absolute right-4 top-4 text-2xl font-bold text-gray-400 hover:text-gray-700"
+        data-modal="modalFicha" aria-label="Fechar">&times;</button>
+      <div id="conteudoFicha"></div>
+    </div>
+  </div>
+
+  <script>
+    let turmaFiltroAtual = '';
+    let alunoSelecionadoId = null;
+    let fotoBase64Atual = '';
+    let temporizadorBusca;
+
+    const listaAlunos = document.getElementById('listaAlunos');
+    const mensagem = document.getElementById('mensagem');
+
+    function escaparHTML(valor = '') {
+      return String(valor).replace(/[&<>"']/g, (caractere) => ({
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        '"': '&quot;',
+        "'": '&#39;'
+      })[caractere]);
+    }
+
+    async function requisicaoAPI(url, opcoes = {}) {
+      const resposta = await fetch(url, {
+        ...opcoes,
+        headers: {
+          ...(opcoes.body ? { 'Content-Type': 'application/json' } : {}),
+          ...opcoes.headers
+        }
+      });
+
+      const dados = await resposta.json().catch(() => ({}));
+      if (!resposta.ok) {
+        throw new Error(dados.error || `Falha na solicitação (HTTP ${resposta.status}).`);
+      }
+      return dados;
+    }
+
+    function mostrarModal(id) {
+      const modal = document.getElementById(id);
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+    }
+
+    function fecharModal(id) {
+      const modal = document.getElementById(id);
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+    }
+
+    document.getElementById('botaoNovoAluno').addEventListener('click', () => {
+      document.getElementById('erroCadastro').textContent = '';
+      mostrarModal('modalCadastro');
+    });
+
+    document.querySelectorAll('.fechar-modal').forEach((botao) => {
+      botao.addEventListener('click', () => fecharModal(botao.dataset.modal));
+    });
+
+    document.querySelectorAll('.botao-turma').forEach((botao) => {
+      botao.addEventListener('click', () => {
+        turmaFiltroAtual = botao.dataset.turma;
+        carregarAlunos();
+      });
+    });
+
+    document.getElementById('campoBusca').addEventListener('input', () => {
+      clearTimeout(temporizadorBusca);
+      temporizadorBusca = setTimeout(carregarAlunos, 250);
+    });
+
+    document.getElementById('inputFoto').addEventListener('change', processarFoto);
+    document.getElementById('aval_peso').addEventListener('input', calcularIMC);
+    document.getElementById('aval_altura').addEventListener('input', calcularIMC);
+
+    async function processarFoto(evento) {
+      const arquivo = evento.target.files[0];
+      if (!arquivo) {
+        fotoBase64Atual = '';
+        return;
+      }
+
+      try {
+        fotoBase64Atual = await new Promise((resolve, reject) => {
+          const imagem = new Image();
+          const leitor = new FileReader();
+
+          leitor.onload = () => {
+            imagem.onload = () => {
+              const limite = 480;
+              const escala = Math.min(1, limite / Math.max(imagem.width, imagem.height));
+              const canvas = document.createElement('canvas');
+              canvas.width = Math.round(imagem.width * escala);
+              canvas.height = Math.round(imagem.height * escala);
+              canvas.getContext('2d').drawImage(imagem, 0, 0, canvas.width, canvas.height);
+              resolve(canvas.toDataURL('image/jpeg', 0.55));
+            };
+            imagem.onerror = reject;
+            imagem.src = leitor.result;
+          };
+
+          leitor.onerror = reject;
+          leitor.readAsDataURL(arquivo);
+        });
+
+        document.getElementById('previewFoto').innerHTML =
+          `<img src="${fotoBase64Atual}" alt="Foto do atleta" class="h-full w-full rounded-full object-cover">`;
+      } catch (erro) {
+        console.error('Erro ao processar foto:', erro);
+        alert('Não foi possível carregar a foto.');
+      }
+    }
+
+    async function carregarAlunos() {
+      mensagem.innerHTML = '<p class="py-4 text-center text-gray-500">Carregando alunos...</p>';
+      const parametros = new URLSearchParams({
+        busca: document.getElementById('campoBusca').value.trim(),
+        turma: turmaFiltroAtual
+      });
+
+      try {
+        const alunos = await requisicaoAPI(`/api/alunos?${parametros}`);
+        mensagem.innerHTML = '';
+        renderizarAlunos(alunos);
+      } catch (erro) {
+        console.error('Erro ao carregar alunos:', erro);
+        listaAlunos.innerHTML = '';
+        mensagem.innerHTML = `<p class="rounded-lg bg-red-50 p-4 text-center text-red-700">${escaparHTML(erro.message)}</p>`;
+      }
+    }
+
+    function renderizarAlunos(alunos) {
+      if (!Array.isArray(alunos) || alunos.length === 0) {
+        listaAlunos.innerHTML = `
+          <div class="col-span-2 rounded-xl bg-white py-12 text-center shadow">
+            <span class="text-4xl">👻</span>
+            <p class="mt-2 text-lg text-gray-500">Nenhum atleta encontrado.</p>
+          </div>`;
+        return;
+      }
+
+      listaAlunos.innerHTML = alunos.map((aluno) => {
+        const id = Number(aluno.id);
+        const nome = escaparHTML(aluno.nome || '');
+        const turma = escaparHTML(aluno.turma || 'Sem categoria');
+        const posicao = escaparHTML(aluno.posicao || '');
+        const responsavel = escaparHTML(aluno.responsavel_nome || 'Não informado');
+        const parentesco = escaparHTML(aluno.parentesco || '');
+        const observacoes = escaparHTML(aluno.observacoes_medicas || '');
+        const pago = aluno.status_mensalidade === 'PAGO';
+        const telefone = String(aluno.telefone_whatsapp || '').replace(/\D/g, '');
+        const foto = aluno.foto_url
+          ? `<img src="${escaparHTML(aluno.foto_url)}" alt="" class="h-12 w-12 shrink-0 rounded-full border-2 border-red-500 object-cover">`
+          : '<div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-full border-2 border-red-500 bg-red-100 text-xl text-red-600">👻</div>';
+
+        return `
+          <article class="flex flex-col justify-between rounded-xl border-l-4 border-red-600 bg-white p-5 shadow transition hover:shadow-md">
+            <div>
+              <div class="mb-2 flex items-start justify-between gap-3">
                 <div class="flex items-center gap-3">
-                  ${fotoHtml}
+                  ${foto}
                   <div>
-                    <h3 class="text-xl font-bold text-gray-800 leading-tight">${aluno.nome}</h3>
+                    <button type="button" class="botao-ficha text-left text-xl font-bold leading-tight text-gray-800 hover:text-red-700" data-id="${id}">
+                      ${nome}
+                    </button>
                     <div class="mt-1">
-                      <span class="inline-block bg-red-100 text-red-800 text-xs px-2.5 py-0.5 rounded-full font-semibold">
-                        ${aluno.turma || "Sem Categoria"}
-                      </span>
-                      ${aluno.posicao ? `<span class="inline-block bg-gray-100 text-gray-700 text-xs px-2.5 py-0.5 rounded-full font-medium ml-1">${aluno.posicao}</span>` : ""}
+                      <span class="inline-block rounded-full bg-red-100 px-2.5 py-0.5 text-xs font-semibold text-red-800">${turma}</span>
+                      ${posicao ? `<span class="ml-1 inline-block rounded-full bg-gray-100 px-2.5 py-0.5 text-xs font-medium text-gray-700">${posicao}</span>` : ''}
                     </div>
                   </div>
                 </div>
-                
-                ${
-                  zapLimpo
-                    ? `
-                  <a href="${linkZap}" target="_blank" class="bg-emerald-500 hover:bg-emerald-600 text-white p-2.5 rounded-full shadow transition flex items-center justify-center shrink-0" title="Chamar no WhatsApp">
-                    💬
-                  </a>
-                `
-                    : ""
-                }
+                ${telefone ? `<a href="https://wa.me/55${encodeURIComponent(telefone)}" target="_blank" rel="noopener noreferrer" class="flex shrink-0 items-center justify-center rounded-full bg-emerald-500 p-2.5 text-white shadow hover:bg-emerald-600" title="Chamar no WhatsApp">💬</a>` : ''}
               </div>
 
-              <div class="text-sm text-gray-600 space-y-1 border-t pt-2 mt-2">
-                <p>👤 <strong>Resp:</strong> ${aluno.responsavel_nome || "Não informado"} ${aluno.parentesco ? `(${aluno.parentesco})` : ""}</p>
-                ${aluno.observacoes_medicas ? `<p class="text-amber-700 bg-amber-50 p-2 rounded text-xs mt-1">⚠️ ${aluno.observacoes_medicas}</p>` : ""}
+              <div class="mt-2 space-y-1 border-t pt-2 text-sm text-gray-600">
+                <p>👤 <strong>Responsável:</strong> ${responsavel}${parentesco ? ` (${parentesco})` : ''}</p>
+                ${observacoes ? `<p class="mt-1 rounded bg-amber-50 p-2 text-xs text-amber-700">⚠️ ${observacoes}</p>` : ''}
               </div>
             </div>
 
-            <div class="pt-4 mt-3 border-t flex justify-end">
-              <button onclick="abrirModalAvaliacoes(${aluno.id}, '${aluno.nome}')" class="bg-red-50 hover:bg-red-100 text-red-700 font-bold text-xs px-3.5 py-2 rounded-lg border border-red-200 transition flex items-center gap-1.5">
-                📊 Avaliações Físicas
-              </button>
-            </div>
-          </div>
-        `;
-          })
-          .join("");
-      }
-
-      function filtrarTurma(turma) {
-        turmaFiltroAtual = turma;
-        carregarAlunos();
-      }
-
-      // Modal Cadastro Aluno
-      function abrirModalCadastro() {
-        fotoBase64Atual = "";
-        document.getElementById("previewFotoContainer").innerHTML = "👻";
-        document.getElementById("modalCadastro").classList.remove("hidden");
-      }
-
-      function fecharModalCadastro() {
-        document.getElementById("modalCadastro").classList.add("hidden");
-        document.getElementById("formAluno").reset();
-        fotoBase64Atual = "";
-        document.getElementById("previewFotoContainer").innerHTML = "👻";
-      }
-
-      async function salvarAluno(event) {
-        event.preventDefault();
-        const novoAluno = {
-          nome: document.getElementById("nome").value,
-          data_nascimento: document.getElementById("data_nascimento").value,
-          turma: document.getElementById("turma").value,
-          posicao: document.getElementById("posicao").value,
-          foto_url: fotoBase64Atual, // Envia a imagem capturada
-          observacoes_medicas: document.getElementById("observacoes_medicas")
-            .value,
-          responsavel: {
-            nome: document.getElementById("resp_nome").value,
-            parentesco: document.getElementById("resp_parentesco").value,
-            telefone_whatsapp: document.getElementById("resp_telefone").value,
-          },
-        };
-
-        try {
-          const resposta = await fetch("/api/alunos", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(novoAluno),
-          });
-
-          if (resposta.ok) {
-            fecharModalCadastro();
-            carregarAlunos();
-          } else {
-            alert("Erro ao cadastrar aluno.");
-          }
-        } catch (erro) {
-          console.error("Erro:", erro);
-        }
-      }
-
-      // Modal Avaliações Físicas
-      function abrirModalAvaliacoes(idAluno, nomeAluno) {
-        alunoSelecionadoId = idAluno;
-        document.getElementById("tituloModalAvaliacao").innerText =
-          `📊 Avaliações: ${nomeAluno}`;
-        document.getElementById("modalAvaliacoes").classList.remove("hidden");
-        document.getElementById("containerMetricasCustom").innerHTML = "";
-        document.getElementById("formAvaliacao").reset();
-        document.getElementById("aval_imc_display").classList.add("hidden");
-        carregarHistoricoAvaliacoes(idAluno);
-      }
-
-      function fecharModalAvaliacoes() {
-        document.getElementById("modalAvaliacoes").classList.add("hidden");
-        alunoSelecionadoId = null;
-      }
-
-      function calcularIMC() {
-        const peso =
-          parseFloat(document.getElementById("aval_peso").value) || 0;
-        const alturaCm =
-          parseFloat(document.getElementById("aval_altura").value) || 0;
-        const display = document.getElementById("aval_imc_display");
-
-        if (peso > 0 && alturaCm > 0) {
-          const alturaM = alturaCm / 100;
-          const imc = (peso / (alturaM * alturaM)).toFixed(2);
-          let texto = "";
-          let corClasse = "";
-
-          if (imc < 18.5) {
-            texto = "Abaixo do peso";
-            corClasse = "text-amber-600 bg-amber-50 border-amber-200";
-          } else if (imc < 25) {
-            texto = "Peso ideal";
-            corClasse =
-              "text-emerald-600 bg-emerald-50 border-emerald-200 font-bold";
-          } else if (imc < 30) {
-            texto = "Sobrepeso";
-            corClasse = "text-amber-600 bg-amber-50 border-amber-200";
-          } else {
-            texto = "Obesidade";
-            corClasse = "text-red-600 bg-red-50 border-red-200 font-bold";
-          }
-
-          display.innerHTML = `IMC Calculado: <strong>${imc}</strong> (${texto})`;
-          display.className = `p-2 rounded-lg border text-center text-sm ${corClasse}`;
-          display.classList.remove("hidden");
-        } else {
-          display.classList.add("hidden");
-        }
-      }
-
-      function adicionarCampoMetrica() {
-        const container = document.getElementById("containerMetricasCustom");
-        const div = document.createElement("div");
-        div.className = "flex gap-2 items-center item-metrica-custom";
-        div.innerHTML = `
-        <input type="text" placeholder="Nome (ex: Salto Vertical)" class="w-1/2 border rounded-lg p-2 text-xs input-metrica-nome" required>
-        <input type="text" placeholder="Valor (ex: 30 cm)" class="w-1/2 border rounded-lg p-2 text-xs input-metrica-valor" required>
-        <button type="button" onclick="this.parentElement.remove()" class="text-red-500 font-bold px-2 hover:bg-red-50 rounded">✕</button>
-      `;
-        container.appendChild(div);
-      }
-
-      async function carregarHistoricoAvaliacoes(alunoId) {
-        const container = document.getElementById("listaHistoricoAvaliacoes");
-        container.innerHTML =
-          '<p class="text-gray-400 text-sm text-center py-4">Carregando...</p>';
-
-        try {
-          const resposta = await fetch(`/api/alunos/${alunoId}/avaliacoes`);
-          const avaliacoes = await resposta.json();
-
-          if (avaliacoes.length === 0) {
-            container.innerHTML =
-              '<p class="text-gray-400 text-sm text-center py-4">Nenhuma avaliação física registrada para este atleta.</p>';
-            return;
-          }
-
-          container.innerHTML = avaliacoes
-            .map((aval) => {
-              const dataFormatada = new Date(
-                aval.data_avaliacao,
-              ).toLocaleDateString("pt-BR");
-
-              const metricasHtml = (aval.metricas_customizadas || [])
-                .map(
-                  (m) => `
-            <span class="inline-block bg-gray-100 text-gray-700 text-xs px-2 py-1 rounded border mr-1 mb-1">
-              <strong>${m.nome_metrica}:</strong> ${m.valor}
-            </span>
-          `,
-                )
-                .join("");
-
-              return `
-            <div class="bg-white p-4 rounded-xl border shadow-sm space-y-2">
-              <div class="flex justify-between items-center text-xs text-gray-500 border-b pb-2">
-                <span>📅 <strong>Data:</strong> ${dataFormatada}</span>
-                <span class="bg-red-50 text-red-700 font-bold px-2 py-0.5 rounded">IMC: ${aval.imc}</span>
+            <div class="mt-3 flex flex-wrap items-center justify-between gap-2 border-t pt-4">
+              <span class="text-xs font-semibold ${pago ? 'text-green-700' : 'text-amber-700'}">
+                ${pago ? 'Mensalidade em dia' : 'Mensalidade pendente'}
+              </span>
+              <div class="flex flex-wrap gap-2">
+                <button type="button" class="botao-pagamento rounded-lg border px-3 py-2 text-xs font-bold ${pago ? 'border-gray-300 bg-gray-50 text-gray-700 hover:bg-gray-100' : 'border-emerald-200 bg-emerald-50 text-emerald-800 hover:bg-emerald-100'}" data-id="${id}" data-status="${pago ? 'PENDENTE' : 'PAGO'}">
+                  ${pago ? 'Marcar pendente' : 'Dar baixa'}
+                </button>
+                <button type="button" class="botao-avaliacoes rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-xs font-bold text-red-700 hover:bg-red-100" data-id="${id}" data-nome="${nome}">
+                  📊 Avaliações
+                </button>
               </div>
-
-              <div class="grid grid-cols-3 gap-2 text-xs font-medium text-gray-700 py-1">
-                <div>⚖️ Peso: <strong>${aval.peso_kg} kg</strong></div>
-                <div>📏 Altura: <strong>${aval.altura_cm} cm</strong></div>
-                <div>🤸 Alongamento: <strong>${aval.alongamento_cm || 0} cm</strong></div>
-              </div>
-
-              ${metricasHtml ? `<div class="pt-1">${metricasHtml}</div>` : ""}
-              ${aval.observacoes ? `<p class="text-xs text-gray-600 bg-gray-50 p-2 rounded italic">"${aval.observacoes}"</p>` : ""}
             </div>
-          `;
-            })
-            .join("");
-        } catch (erro) {
-          console.error("Erro ao buscar avaliações:", erro);
-          container.innerHTML =
-            '<p class="text-red-500 text-sm text-center">Erro ao carregar histórico.</p>';
-        }
+          </article>`;
+      }).join('');
+    }
+
+    listaAlunos.addEventListener('click', async (evento) => {
+      const botaoFicha = evento.target.closest('.botao-ficha');
+      const botaoPagamento = evento.target.closest('.botao-pagamento');
+      const botaoAvaliacoes = evento.target.closest('.botao-avaliacoes');
+
+      if (botaoFicha) await abrirFichaAluno(botaoFicha.dataset.id);
+      if (botaoPagamento) await darBaixaManual(botaoPagamento.dataset.id, botaoPagamento.dataset.status);
+      if (botaoAvaliacoes) abrirModalAvaliacoes(botaoAvaliacoes.dataset.id, botaoAvaliacoes.dataset.nome);
+    });
+
+    async function abrirFichaAluno(id) {
+      const conteudo = document.getElementById('conteudoFicha');
+      conteudo.innerHTML = '<p class="text-gray-500">Carregando ficha...</p>';
+      mostrarModal('modalFicha');
+
+      try {
+        const aluno = await requisicaoAPI(`/api/alunos/${encodeURIComponent(id)}`);
+        conteudo.innerHTML = `
+          <h2 class="mb-4 pr-8 text-2xl font-bold text-red-700">${escaparHTML(aluno.nome)}</h2>
+          <div class="space-y-2 text-sm">
+            <p><strong>Turma:</strong> ${escaparHTML(aluno.turma || 'Não informada')}</p>
+            <p><strong>Nascimento:</strong> ${escaparHTML(aluno.data_nascimento || 'Não informado')}</p>
+            <p><strong>Posição:</strong> ${escaparHTML(aluno.posicao || 'Não informada')}</p>
+            <p><strong>Responsável:</strong> ${escaparHTML(aluno.responsavel_nome || 'Não informado')}</p>
+            <p><strong>Parentesco:</strong> ${escaparHTML(aluno.parentesco || 'Não informado')}</p>
+            <p><strong>WhatsApp:</strong> ${escaparHTML(aluno.telefone_whatsapp || 'Não informado')}</p>
+            <p><strong>Mensalidade:</strong> ${escaparHTML(aluno.status_mensalidade || 'PENDENTE')}</p>
+            <p><strong>Observações médicas:</strong> ${escaparHTML(aluno.observacoes_medicas || 'Nenhuma')}</p>
+          </div>`;
+      } catch (erro) {
+        conteudo.innerHTML = `<p class="text-red-600">${escaparHTML(erro.message)}</p>`;
       }
+    }
 
-      async function salvarAvaliacao(event) {
-        event.preventDefault();
-        if (!alunoSelecionadoId) return;
+    async function darBaixaManual(id, status) {
+      const confirmacao = status === 'PAGO'
+        ? 'Confirmar baixa manual do pagamento?'
+        : 'Marcar a mensalidade como pendente?';
 
-        const itensMetricas = document.querySelectorAll(".item-metrica-custom");
-        const metricas_customizadas = [];
-        itensMetricas.forEach((item) => {
-          const nome = item.querySelector(".input-metrica-nome").value;
-          const valor = item.querySelector(".input-metrica-valor").value;
-          if (nome && valor) {
-            metricas_customizadas.push({ nome_metrica: nome, valor: valor });
-          }
+      if (!window.confirm(confirmacao)) return;
+
+      try {
+        await requisicaoAPI(`/api/alunos/${encodeURIComponent(id)}/pagamento-manual`, {
+          method: 'POST',
+          body: JSON.stringify({ status })
+        });
+        await carregarAlunos();
+      } catch (erro) {
+        alert(`Não foi possível atualizar o pagamento: ${erro.message}`);
+      }
+    }
+
+    async function salvarAluno(evento) {
+      evento.preventDefault();
+      const erroElemento = document.getElementById('erroCadastro');
+      erroElemento.textContent = '';
+
+      const novoAluno = {
+        nome: document.getElementById('nome').value.trim(),
+        data_nascimento: document.getElementById('data_nascimento').value,
+        turma: document.getElementById('turma').value,
+        posicao: document.getElementById('posicao').value.trim(),
+        foto_url: fotoBase64Atual,
+        observacoes_medicas: document.getElementById('observacoes_medicas').value.trim(),
+        responsavel: {
+          nome: document.getElementById('resp_nome').value.trim(),
+          parentesco: document.getElementById('resp_parentesco').value.trim(),
+          telefone_whatsapp: document.getElementById('resp_telefone').value.trim(),
+          cpf: document.getElementById('resp_cpf').value.trim()
+        }
+      };
+
+      try {
+        await requisicaoAPI('/api/alunos', {
+          method: 'POST',
+          body: JSON.stringify(novoAluno)
         });
 
-        const dadosAvaliacao = {
-          peso_kg: parseFloat(document.getElementById("aval_peso").value),
-          altura_cm: parseFloat(document.getElementById("aval_altura").value),
-          alongamento_cm:
-            parseFloat(document.getElementById("aval_alongamento").value) || 0,
-          observacoes: document.getElementById("aval_observacoes").value,
-          metricas_customizadas: metricas_customizadas,
-        };
+        document.getElementById('formAluno').reset();
+        document.getElementById('previewFoto').textContent = '👻';
+        fotoBase64Atual = '';
+        fecharModal('modalCadastro');
+        await carregarAlunos();
+      } catch (erro) {
+        erroElemento.textContent = erro.message;
+      }
+    }
 
-        try {
-          const resposta = await fetch(
-            `/api/alunos/${alunoSelecionadoId}/avaliacoes`,
-            {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify(dadosAvaliacao),
-            },
-          );
+    document.getElementById('formAluno').addEventListener('submit', salvarAluno);
 
-          if (resposta.ok) {
-            document.getElementById("formAvaliacao").reset();
-            document.getElementById("containerMetricasCustom").innerHTML = "";
-            document.getElementById("aval_imc_display").classList.add("hidden");
-            carregarHistoricoAvaliacoes(alunoSelecionadoId);
-          } else {
-            alert("Erro ao registrar avaliação.");
-          }
-        } catch (erro) {
-          console.error("Erro ao salvar avaliação:", erro);
+    function abrirModalAvaliacoes(idAluno, nomeAluno) {
+      alunoSelecionadoId = idAluno;
+      document.getElementById('tituloAvaliacao').textContent = '📊 Avaliações físicas';
+      document.getElementById('subtituloAvaliacao').textContent = nomeAluno;
+      document.getElementById('erroAvaliacao').textContent = '';
+      document.getElementById('formAvaliacao').reset();
+      document.getElementById('imcDisplay').classList.add('hidden');
+      mostrarModal('modalAvaliacoes');
+      carregarHistoricoAvaliacoes(idAluno);
+    }
+
+    function calcularIMC() {
+      const peso = Number(document.getElementById('aval_peso').value);
+      const alturaCm = Number(document.getElementById('aval_altura').value);
+      const display = document.getElementById('imcDisplay');
+
+      if (!peso || !alturaCm || peso <= 0 || alturaCm <= 0) {
+        display.classList.add('hidden');
+        return;
+      }
+
+      const imc = peso / ((alturaCm / 100) ** 2);
+      display.textContent = `IMC calculado: ${imc.toFixed(2)}`;
+      display.className = 'rounded-lg border bg-white p-2 text-center text-sm';
+    }
+
+    async function carregarHistoricoAvaliacoes(idAluno) {
+      const container = document.getElementById('historicoAvaliacoes');
+      container.innerHTML = '<p class="py-4 text-center text-sm text-gray-400">Carregando histórico...</p>';
+
+      try {
+        const avaliacoes = await requisicaoAPI(`/api/alunos/${encodeURIComponent(idAluno)}/avaliacoes`);
+
+        if (!avaliacoes.length) {
+          container.innerHTML = '<p class="py-4 text-center text-sm text-gray-400">Nenhuma avaliação registrada.</p>';
+          return;
         }
-      }
-    </script>
 
-    <!-- Service Worker do PWA -->
-    <script>
-      if ("serviceWorker" in navigator) {
-        window.addEventListener("load", () => {
-          navigator.serviceWorker
-            .register("/service-worker.js")
-            .then(() => console.log("PWA do Fantasminha FC ativado!"))
-            .catch((err) => console.error("Erro ao ativar PWA:", err));
-        });
+        container.innerHTML = avaliacoes.map((avaliacao) => {
+          const data = avaliacao.data_avaliacao
+            ? new Date(avaliacao.data_avaliacao).toLocaleDateString('pt-BR')
+            : 'Data não informada';
+
+          return `
+            <article class="space-y-2 rounded-xl border bg-white p-4 shadow-sm">
+              <div class="flex items-center justify-between border-b pb-2 text-xs text-gray-500">
+                <span>📅 ${escaparHTML(data)}</span>
+                <span class="rounded bg-red-50 px-2 py-0.5 font-bold text-red-700">IMC: ${escaparHTML(avaliacao.imc ?? '—')}</span>
+              </div>
+              <div class="grid grid-cols-2 gap-2 text-xs font-medium text-gray-700 md:grid-cols-3">
+                <div>⚖️ Peso: <strong>${escaparHTML(avaliacao.peso_kg)} kg</strong></div>
+                <div>📏 Altura: <strong>${escaparHTML(avaliacao.altura_cm)} cm</strong></div>
+                <div>🤸 Alongamento: <strong>${escaparHTML(avaliacao.alongamento_cm || 0)} cm</strong></div>
+              </div>
+              ${avaliacao.observacoes ? `<p class="rounded bg-gray-50 p-2 text-xs text-gray-600">${escaparHTML(avaliacao.observacoes)}</p>` : ''}
+            </article>`;
+        }).join('');
+      } catch (erro) {
+        container.innerHTML = `<p class="py-4 text-center text-sm text-red-600">${escaparHTML(erro.message)}</p>`;
       }
-    </script>
-  </body>
+    }
+
+    document.getElementById('formAvaliacao').addEventListener('submit', async (evento) => {
+      evento.preventDefault();
+      if (!alunoSelecionadoId) return;
+
+      const erroElemento = document.getElementById('erroAvaliacao');
+      erroElemento.textContent = '';
+
+      const dados = {
+        peso_kg: Number(document.getElementById('aval_peso').value),
+        altura_cm: Number(document.getElementById('aval_altura').value),
+        alongamento_cm: Number(document.getElementById('aval_alongamento').value) || 0,
+        observacoes: document.getElementById('aval_observacoes').value.trim()
+      };
+
+      try {
+        await requisicaoAPI(`/api/alunos/${encodeURIComponent(alunoSelecionadoId)}/avaliacoes`, {
+          method: 'POST',
+          body: JSON.stringify(dados)
+        });
+        document.getElementById('formAvaliacao').reset();
+        document.getElementById('imcDisplay').classList.add('hidden');
+        await carregarHistoricoAvaliacoes(alunoSelecionadoId);
+      } catch (erro) {
+        erroElemento.textContent = erro.message;
+      }
+    });
+
+    carregarAlunos();
+
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/service-worker.js')
+          .catch((erro) => console.error('Erro ao registrar Service Worker:', erro));
+      });
+    }
+  </script>
+</body>
+
 </html>
