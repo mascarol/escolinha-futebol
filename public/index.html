@@ -1,3 +1,6 @@
+Aqui está o seu arquivo **`index.html`** completo, já contendo a estrutura original atualizada com o botão de edição no card, a modal de edição e todas as funções JavaScript necessárias integradas:
+
+```html
 <!doctype html>
 <html lang="pt-BR">
 
@@ -159,6 +162,98 @@
     </div>
   </div>
 
+  <!-- Modal de Edição de Aluno -->
+  <div id="modalEdicao" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/60 p-4">
+    <div class="relative max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-2xl bg-white p-6 shadow-2xl">
+      <button type="button"
+        class="fechar-modal absolute right-4 top-4 text-2xl font-bold text-gray-400 hover:text-gray-700"
+        data-modal="modalEdicao" aria-label="Fechar">&times;</button>
+      <h2 class="mb-4 flex items-center gap-2 text-2xl font-bold text-red-700">✏️ Editar Aluno</h2>
+
+      <form id="formEdicao" class="space-y-4">
+        <input type="hidden" id="edit_id">
+        <div class="flex items-center gap-4 rounded-xl border bg-gray-50 p-3">
+          <div id="previewFotoEdicao"
+            class="flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-full border-2 border-red-500 bg-red-100 text-2xl">
+            👻</div>
+          <div>
+            <label class="mb-1 block text-xs font-semibold">Foto do atleta</label>
+            <input type="file" id="inputFotoEdicao" accept="image/*" capture="environment" class="block max-w-full text-xs">
+          </div>
+        </div>
+
+        <div class="space-y-3 border-b pb-4">
+          <h3 class="text-sm font-semibold uppercase tracking-wider text-gray-700">Dados do atleta</h3>
+          <div>
+            <label for="edit_nome" class="mb-1 block text-sm font-medium">Nome completo *</label>
+            <input id="edit_nome" required class="w-full rounded-lg border p-2.5 focus:ring-2 focus:ring-red-500">
+          </div>
+
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label for="edit_data_nascimento" class="mb-1 block text-sm font-medium">Data de nascimento *</label>
+              <input type="date" id="edit_data_nascimento" required
+                class="w-full rounded-lg border p-2.5 focus:ring-2 focus:ring-red-500">
+            </div>
+            <div>
+              <label for="edit_turma" class="mb-1 block text-sm font-medium">Turma</label>
+              <select id="edit_turma" class="w-full rounded-lg border p-2.5 focus:ring-2 focus:ring-red-500">
+                <option value="Sub-7">Sub-7</option>
+                <option value="Sub-9">Sub-9</option>
+                <option value="Sub-11">Sub-11</option>
+                <option value="Sub-13">Sub-13</option>
+                <option value="Sub-15">Sub-15</option>
+                <option value="Sub-17">Sub-17</option>
+              </select>
+            </div>
+          </div>
+
+          <div>
+            <label for="edit_posicao" class="mb-1 block text-sm font-medium">Posição preferida</label>
+            <input id="edit_posicao" class="w-full rounded-lg border p-2.5 focus:ring-2 focus:ring-red-500">
+          </div>
+
+          <div>
+            <label for="edit_observacoes_medicas" class="mb-1 block text-sm font-medium">Observações médicas</label>
+            <textarea id="edit_observacoes_medicas" rows="2" class="w-full rounded-lg border p-2.5 focus:ring-2 focus:ring-red-500"></textarea>
+          </div>
+        </div>
+
+        <div class="space-y-3 pt-2">
+          <h3 class="text-sm font-semibold uppercase tracking-wider text-gray-700">Dados do responsável</h3>
+          <div>
+            <label for="edit_resp_nome" class="mb-1 block text-sm font-medium">Nome do responsável *</label>
+            <input id="edit_resp_nome" required class="w-full rounded-lg border p-2.5 focus:ring-2 focus:ring-red-500">
+          </div>
+
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label for="edit_resp_parentesco" class="mb-1 block text-sm font-medium">Parentesco</label>
+              <input id="edit_resp_parentesco" class="w-full rounded-lg border p-2.5 focus:ring-2 focus:ring-red-500">
+            </div>
+            <div>
+              <label for="edit_resp_telefone" class="mb-1 block text-sm font-medium">WhatsApp *</label>
+              <input type="tel" id="edit_resp_telefone" required class="w-full rounded-lg border p-2.5 focus:ring-2 focus:ring-red-500">
+            </div>
+          </div>
+
+          <div>
+            <label for="edit_resp_cpf" class="mb-1 block text-sm font-medium">CPF do responsável</label>
+            <input id="edit_resp_cpf" class="w-full rounded-lg border p-2.5 focus:ring-2 focus:ring-red-500">
+          </div>
+        </div>
+
+        <div id="erroEdicao" class="text-sm text-red-600" aria-live="polite"></div>
+        <div class="flex justify-end gap-3 pt-2">
+          <button type="button" class="fechar-modal rounded-lg px-4 py-2 text-gray-600 hover:bg-gray-100"
+            data-modal="modalEdicao">Cancelar</button>
+          <button type="submit"
+            class="rounded-lg bg-blue-600 px-6 py-2 font-bold text-white shadow hover:bg-blue-700">Salvar alterações</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
   <!-- Modal de avaliações -->
   <div id="modalAvaliacoes" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/60 p-4">
     <div class="relative max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-2xl bg-white p-6 shadow-2xl">
@@ -218,6 +313,7 @@
     let turmaFiltroAtual = '';
     let alunoSelecionadoId = null;
     let fotoBase64Atual = '';
+    let fotoBase64Edicao = '';
     let temporizadorBusca;
 
     const listaAlunos = document.getElementById('listaAlunos');
@@ -294,28 +390,7 @@
       }
 
       try {
-        fotoBase64Atual = await new Promise((resolve, reject) => {
-          const imagem = new Image();
-          const leitor = new FileReader();
-
-          leitor.onload = () => {
-            imagem.onload = () => {
-              const limite = 480;
-              const escala = Math.min(1, limite / Math.max(imagem.width, imagem.height));
-              const canvas = document.createElement('canvas');
-              canvas.width = Math.round(imagem.width * escala);
-              canvas.height = Math.round(imagem.height * escala);
-              canvas.getContext('2d').drawImage(imagem, 0, 0, canvas.width, canvas.height);
-              resolve(canvas.toDataURL('image/jpeg', 0.55));
-            };
-            imagem.onerror = reject;
-            imagem.src = leitor.result;
-          };
-
-          leitor.onerror = reject;
-          leitor.readAsDataURL(arquivo);
-        });
-
+        fotoBase64Atual = await processarArquivoFoto(arquivo);
         document.getElementById('previewFoto').innerHTML =
           `<img src="${fotoBase64Atual}" alt="Foto do atleta" class="h-full w-full rounded-full object-cover">`;
       } catch (erro) {
@@ -323,6 +398,45 @@
         alert('Não foi possível carregar a foto.');
       }
     }
+
+    function processarArquivoFoto(arquivo) {
+      return new Promise((resolve, reject) => {
+        const imagem = new Image();
+        const leitor = new FileReader();
+
+        leitor.onload = () => {
+          imagem.onload = () => {
+            const limite = 480;
+            const escala = Math.min(1, limite / Math.max(imagem.width, imagem.height));
+            const canvas = document.createElement('canvas');
+            canvas.width = Math.round(imagem.width * escala);
+            canvas.height = Math.round(imagem.height * escala);
+            canvas.getContext('2d').drawImage(imagem, 0, 0, canvas.width, canvas.height);
+            resolve(canvas.toDataURL('image/jpeg', 0.55));
+          };
+          imagem.onerror = reject;
+          imagem.src = leitor.result;
+        };
+
+        leitor.onerror = reject;
+        leitor.readAsDataURL(arquivo);
+      });
+    }
+
+    document.getElementById('inputFotoEdicao').addEventListener('change', async (evento) => {
+      const arquivo = evento.target.files[0];
+      if (!arquivo) {
+        fotoBase64Edicao = '';
+        return;
+      }
+      try {
+        fotoBase64Edicao = await processarArquivoFoto(arquivo);
+        document.getElementById('previewFotoEdicao').innerHTML =
+          `<img src="${fotoBase64Edicao}" alt="Foto" class="h-full w-full rounded-full object-cover">`;
+      } catch (e) {
+        alert('Erro ao processar nova foto.');
+      }
+    });
 
     async function carregarAlunos() {
       mensagem.innerHTML = '<p class="py-4 text-center text-gray-500">Carregando alunos...</p>';
@@ -396,6 +510,9 @@
                 ${pago ? 'Mensalidade em dia' : 'Mensalidade pendente'}
               </span>
               <div class="flex flex-wrap gap-2">
+                <button type="button" class="botao-editar rounded-lg border border-blue-200 bg-blue-50 px-3 py-2 text-xs font-bold text-blue-700 hover:bg-blue-100" data-id="${id}">
+                  ✏️ Editar
+                </button>
                 <button type="button" class="botao-pagamento rounded-lg border px-3 py-2 text-xs font-bold ${pago ? 'border-gray-300 bg-gray-50 text-gray-700 hover:bg-gray-100' : 'border-emerald-200 bg-emerald-50 text-emerald-800 hover:bg-emerald-100'}" data-id="${id}" data-status="${pago ? 'PENDENTE' : 'PAGO'}">
                   ${pago ? 'Marcar pendente' : 'Dar baixa'}
                 </button>
@@ -410,10 +527,12 @@
 
     listaAlunos.addEventListener('click', async (evento) => {
       const botaoFicha = evento.target.closest('.botao-ficha');
+      const botaoEditar = evento.target.closest('.botao-editar');
       const botaoPagamento = evento.target.closest('.botao-pagamento');
       const botaoAvaliacoes = evento.target.closest('.botao-avaliacoes');
 
       if (botaoFicha) await abrirFichaAluno(botaoFicha.dataset.id);
+      if (botaoEditar) await abrirModalEdicao(botaoEditar.dataset.id);
       if (botaoPagamento) await darBaixaManual(botaoPagamento.dataset.id, botaoPagamento.dataset.status);
       if (botaoAvaliacoes) abrirModalAvaliacoes(botaoAvaliacoes.dataset.id, botaoAvaliacoes.dataset.nome);
     });
@@ -441,6 +560,70 @@
         conteudo.innerHTML = `<p class="text-red-600">${escaparHTML(erro.message)}</p>`;
       }
     }
+
+    async function abrirModalEdicao(id) {
+      document.getElementById('erroEdicao').textContent = '';
+      try {
+        const aluno = await requisicaoAPI(`/api/alunos/${encodeURIComponent(id)}`);
+        
+        document.getElementById('edit_id').value = aluno.id;
+        document.getElementById('edit_nome').value = aluno.nome || '';
+        document.getElementById('edit_data_nascimento').value = aluno.data_nascimento || '';
+        document.getElementById('edit_turma').value = aluno.turma || 'Sub-11';
+        document.getElementById('edit_posicao').value = aluno.posicao || '';
+        document.getElementById('edit_observacoes_medicas').value = aluno.observacoes_medicas || '';
+        document.getElementById('edit_resp_nome').value = aluno.responsavel_nome || '';
+        document.getElementById('edit_resp_parentesco').value = aluno.parentesco || '';
+        document.getElementById('edit_resp_telefone').value = aluno.telefone_whatsapp || '';
+        document.getElementById('edit_resp_cpf').value = aluno.responsavel_cpf || '';
+
+        fotoBase64Edicao = aluno.foto_url || '';
+        if (fotoBase64Edicao) {
+          document.getElementById('previewFotoEdicao').innerHTML =
+            `<img src="${escaparHTML(fotoBase64Edicao)}" alt="Foto" class="h-full w-full rounded-full object-cover">`;
+        } else {
+          document.getElementById('previewFotoEdicao').textContent = '👻';
+        }
+
+        mostrarModal('modalEdicao');
+      } catch (erro) {
+        alert(`Erro ao carregar dados para edição: ${erro.message}`);
+      }
+    }
+
+    document.getElementById('formEdicao').addEventListener('submit', async (evento) => {
+      evento.preventDefault();
+      const id = document.getElementById('edit_id').value;
+      const erroElemento = document.getElementById('erroEdicao');
+      erroElemento.textContent = '';
+
+      const alunoAtualizado = {
+        nome: document.getElementById('edit_nome').value.trim(),
+        data_nascimento: document.getElementById('edit_data_nascimento').value,
+        turma: document.getElementById('edit_turma').value,
+        posicao: document.getElementById('edit_posicao').value.trim(),
+        foto_url: fotoBase64Edicao,
+        observacoes_medicas: document.getElementById('edit_observacoes_medicas').value.trim(),
+        responsavel: {
+          nome: document.getElementById('edit_resp_nome').value.trim(),
+          parentesco: document.getElementById('edit_resp_parentesco').value.trim(),
+          telefone_whatsapp: document.getElementById('edit_resp_telefone').value.trim(),
+          cpf: document.getElementById('edit_resp_cpf').value.trim()
+        }
+      };
+
+      try {
+        await requisicaoAPI(`/api/alunos/${encodeURIComponent(id)}`, {
+          method: 'PUT',
+          body: JSON.stringify(alunoAtualizado)
+        });
+
+        fecharModal('modalEdicao');
+        await carregarAlunos();
+      } catch (erro) {
+        erroElemento.textContent = erro.message;
+      }
+    });
 
     async function darBaixaManual(id, status) {
       const confirmacao = status === 'PAGO'
@@ -598,4 +781,6 @@
   </script>
 </body>
 
-</html>
+</html>cd "/home/mascarol/Documentos/SOFTWARE ESCOLINHA GREGOR/escolinha-futebol"
+git status
+git branch --show-current
