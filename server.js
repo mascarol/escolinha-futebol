@@ -37,7 +37,10 @@ db.serialize(() => {
       status_mensalidade TEXT DEFAULT 'PENDENTE'
     )
   `);
-
+  db.run(
+    "ALTER TABLE alunos ADD COLUMN status_mensalidade TEXT DEFAULT 'PENDENTE'", (
+      err) => { });
+  
   db.run(`
     CREATE TABLE IF NOT EXISTS avaliacoes (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -66,6 +69,40 @@ db.serialize(() => {
       FOREIGN KEY (aluno_id) REFERENCES alunos(id)
     )
   `);
+});
+// Rota para Atualizar Dados do Aluno (PUT)
+app.put('/api/alunos/:id', (req, res) => {
+  const { id } = req.params;
+  const {
+    nome,
+    data_nascimento,
+    turma,
+    posicao,
+    foto_url,
+    observacoes_medicas,
+    responsavel
+  } = req.body;
+
+  const turmaFinal = turma || calcularTurmaPorIdade(data_nascimento);
+  const respNome = responsavel ? responsavel.nome : '';
+  const parentesco = responsavel ? responsavel.parentesco : '';
+  const telefone = responsavel ? responsavel.telefone_whatsapp : '';
+  const respCpf = responsavel ? responsavel.cpf : '';
+
+  const sql = `
+        UPDATE alunos 
+        SET nome = ?, data_nascimento = ?, turma = ?, posicao = ?, foto_url = ?, observacoes_medicas = ?, responsavel_nome = ?, parentesco = ?, telefone_whatsapp = ?, responsavel_cpf = ? 
+        WHERE id = ?
+    `;
+
+  db.run(
+    sql,
+    [nome, data_nascimento, turmaFinal, posicao, foto_url, observacoes_medicas, respNome, parentesco, telefone, respCpf, id],
+    function (err) {
+      if (err) return res.status(500).json({ error: err.message });
+      res.json({ message: 'Dados do aluno atualizados com sucesso!' });
+    }
+  );
 });
 
 // Calcula a turma pela idade
